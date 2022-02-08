@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Purchase;
+use App\Models\Supplier;
 use Illuminate\Http\Request;
+use DB;
 
 class PurchaseController extends Controller
 {
@@ -21,7 +23,8 @@ class PurchaseController extends Controller
     {
         //
         $show = Purchase::all();
-        return view('purchase',['showPurchase'=>$show]);
+        $show_supp = Supplier::all();
+        return view('purchase',['showPurchase'=>$show],['Show_supp'=>$show_supp]);
     }
 
     /**
@@ -111,5 +114,11 @@ class PurchaseController extends Controller
         $purchase->delete();
         
         return redirect()->back()->with('status','Purchase deleted successfully');
+    }
+
+    public function getBrandBySupplier($post)
+    {
+        $Sup_Name = Supplier::find($post);
+
     }
 }

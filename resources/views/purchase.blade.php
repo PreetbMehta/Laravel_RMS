@@ -61,15 +61,27 @@
                             <label for="Supplier_Name">
                                 <b>2) Supplier Name:</b>
                             </label>
-                            <input type="text" name="Supplier_Name" id="Supplier_Name" class="form-control" required>
+                            {{-- <input type="text" name="Supplier_Name" id="Supplier_Name" class="form-control" required> --}}
+                            <select name="Supplier_Name" id="Supplier_Name" class="form-control">
+                                <option >Open this select menu</option>
+                                @foreach ($Show_supp as $show_supp)
+                                    <option value="{{$show_supp->Supplier_Name}}" data-brand="{{$show_supp->Brand_Name}}">{{$show_supp->Supplier_Name}}</option>
+                                @endforeach
+                            </select>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6">
-                            <label for="Supplier_Id">
-                                <b>3)Supplier Id:</b>
+                            <label for="Brand_Name">
+                                <b>3)Brand Name:</b>
                             </label>
-                            <input type="text" name="Supplier_Id" id="Supplier_Id" class="form-control" required>
+                            <input type="text" name="Brand_Name" id="Brand_Name" class="form-control" required>
+                            {{-- <select name="Brand_Name" id="Brand_Name" class="form-control">
+                                <option value="">Open this select menu</option>
+                                @foreach ($Show_supp as $show_supp)
+                                    <option value="{{$show_supp->Brand_Name}}">{{$show_supp->Brand_Name}}</option>
+                                @endforeach
+                            </select> --}}
                         </div>
                         <div class="col-md-6">
                             <label for="Quantity">
@@ -240,5 +252,10 @@
         $(document).ready(function() {
             $('#Purchase-Table').DataTable();
         });
+
+        $("#Supplier_Name").on('change',function(){
+            var selecteBrand = $(this).find(":selected").data("brand");
+            $("#Brand_Name").val(selecteBrand);
+       });
     </script>
 @endsection
