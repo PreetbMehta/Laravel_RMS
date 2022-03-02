@@ -5,6 +5,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,8 @@ Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::resource('suppliers', SupplierController::class);
+Route::get('fetch-supplier',[App\Http\Controllers\SupplierController::class, 'fetchsupplier']);
 Route::resource('purchase',PurchaseController::class);
 Route::resource('categories', CategoryController::class);
 Route::resource('products', ProductController::class);
+Route::resource('customers', CustomerController::class);

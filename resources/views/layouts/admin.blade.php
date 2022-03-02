@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="csrf-token" content="{{csrf_token()}}">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>RMS System| Dashboard</title>
 
@@ -30,7 +31,8 @@
   <link rel="stylesheet" href="//cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
 
   <!-- jQuery -->
-<script src={{asset("plugins/jquery/jquery.min.js")}}></script>
+  <script src={{asset("plugins/jquery/jquery.min.js")}}></script>
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -105,7 +107,7 @@
   <!-- Main Sidebar Container -->
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
-    <a href="index3.html" class="brand-link">
+    <a href={{route('home')}} class="brand-link">
       <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light">RMS System</span>
     </a>
@@ -114,31 +116,15 @@
     <div class="sidebar">
 
       <!-- Sidebar Menu -->
-      <nav class="mt-2">
+      <nav class="mt-2 side_nav">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item">
-            <a href={{route('home')}} class="nav-link active">
+            <a href={{route('home')}} class="nav-link">
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
                 Dashboard
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href={{route('suppliers.index')}} class="nav-link">
-              <i class="nav-icon fas fa-chart-pie"></i>
-              <p>
-                Suppliers
-              </p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href={{route('purchase.index')}} class="nav-link">
-              <i class="nav-icon fas fa-chart-pie"></i>
-              <p>
-                Purchase
               </p>
             </a>
           </li>
@@ -155,6 +141,30 @@
               <i class="nav-icon fas fa-tachometer-alt"></i>
               <p>
                 Products
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href={{route('customers.index')}} class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>
+                Customers
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href={{route('suppliers.index')}} class="nav-link">
+              <i class="nav-icon fas fa-chart-pie"></i>
+              <p>
+                Suppliers
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href={{route('purchase.index')}} class="nav-link">
+              <i class="nav-icon fas fa-chart-pie"></i>
+              <p>
+                Purchase
               </p>
             </a>
           </li>
@@ -183,10 +193,10 @@
   </div>
   <!-- /.content-wrapper -->
   <footer class="main-footer">
-    <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
+    <strong>Copyright &copy;  <a href="#">Preet-Mehta</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
-      <b>Version</b> 3.2.0-rc
+      <b>Version</b> RMS1.0
     </div>
   </footer>
 
@@ -227,7 +237,23 @@
 {{-- <script src={{asset("dist/js/demo.js")}}></script> --}}
 
 
-{{-- <!-- JQuery DataTable JS-->
-<script src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script> --}}
+<!-- JQuery DataTable JS-->
+<script src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+
+  {{-- sweet alert js --}}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+{{-- script to active nav tag dynamically as per the page  --}}
+<script>
+  $('.nav a').each(function(){
+    var pageUrl = window.location.href.split(/[?#]/)[0];
+    // console.log(pageUrl);
+    if(this.href == pageUrl)
+    {
+      $(this).addClass('active');
+      // console.log(this.href);
+    }
+  });
+</script>
 </body>
 </html>

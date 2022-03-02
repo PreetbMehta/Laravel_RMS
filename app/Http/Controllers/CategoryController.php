@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\category;
 use Illuminate\Http\Request;
+use Yajra\DataTables\DataTables as Datatables;
+use Illuminate\Support\Facades\Validator;
 
 class CategoryController extends Controller
 {
@@ -17,11 +19,28 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $show = category::all();
-        return view('categories',["showCategory"=>$show]);
+        // $show = category::all();
+        // return view('categories',["showCategory"=>$show]);
+        if ($request->ajax()) {
+
+            $data = category::orderBy("id","desc")->get();
+            return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('action',function($row){
+                $btn = '<button id="edit_Btn" data-toggle="modal" data-target="#EditCategoryModal" value="'.$row->id.'" class="edit btn btn-primary btn-sm editBtn"><i class="fas fa-pen text-white"></i> Edit</button>';
+                $btn = $btn.' <button id="del_Btn" data-toggle="tooltip" value="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deleteBtn"><i class="far fa-trash-alt text-white" data-feather="delete"></i> Delete</button>';
+
+                return $btn;
+
+            })
+            ->rawColumns(['action'])->make(true);
+
+        }
+
+        return view('categories');
     }
 
     /**
@@ -43,12 +62,27 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         // return $request->all();
-        $category = category::create($request->all());
-
-        if($category){
-            return redirect()->back()->with('status','Purchase added successfully');
+        $validate = Validator::make($request->all(),[
+            'Name'=>'required'
+        ]);
+        if($validate->fails())
+        {
+            return response()->json([
+                'status'=>400,
+                'errors'=>$validate->messages()
+            ]);
         }
-        return redirect()->back()->with('status','Purchase not created successfully');
+        else
+        {
+            $category = category::create($request->all());
+            
+            if($category){
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Category added successfully'
+                ]);
+            }
+        }
     }
 
     /**
@@ -83,13 +117,30 @@ class CategoryController extends Controller
     public function update(Request $request,$id)
     {
         //
-        $cat = category::find($id);
-
-        $okay = $cat->update($request->all());
-        if($okay){
-            return redirect()->back()->with('status','Category updated successfully');
+        $Edit_validate = Validator::make($request->all(),[
+            'Name'=>'required'
+        ]);
+        if($Edit_validate->fails())
+        {
+            return response()->json([
+                'status'=>400,
+                'errors'=>$Edit_validate->messages()
+            ]);
         }
-            return redirect()->back()->with('status','Category Not Updated successfully');
+        else
+        {
+            $cat = category::find($id);
+
+            $okay = $cat->update($request->all());
+            if($okay){
+                // return redirect()->back()->with('status','Category updated successfully');
+                return response()->json([
+                    'status' => 200,
+                    'message'=> 'Category updated successfully'
+                ]);
+            }
+        }
+            // return redirect()->back()->with('status','Category Not Updated successfully');
     }
 
     /**
@@ -103,6 +154,9 @@ class CategoryController extends Controller
         $category = category::find($id);
         $category->delete();
         
-        return redirect()->back()->with('status','Category deleted successfully');
+        return response()->json([
+            'status'=>200,
+            'message'=>'Category deleted successfully'
+        ]);
     }
 }

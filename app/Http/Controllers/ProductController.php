@@ -4,24 +4,47 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\category;
+use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use File;
 
 class ProductController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //
-        $show = Product::all();//for fetching all prooduct details
-        
-        $cat_for_select = category::all();//for fetching category names
-        
-        return view('products',['showProduct'=>$show],['Cat_Select'=>$cat_for_select]);
+        $Cat_Select = category::all();//for fetching category names
+        if ($request->ajax()) {
+            $data = Product::orderBy("id","desc")->get();
+            return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('Picture',function($row){
+                $url = asset('Uploads/Product_Pics/'.$row->Picture);
+                return '<img src="'.$url.'" border="0" width="100" class="img-rounded" align="center" />';
+            })
+            ->addColumn('action',function($row){
+                $btn = '<button id="edit_Btn" data-toggle="modal" data-target="#EditProductModal" value="'.$row->id.'" class="edit btn btn-primary btn-sm editBtn"><i class="fas fa-pen text-white"></i> Edit</button>';
+                $btn = $btn.' <button id="del_Btn" data-toggle="tooltip" value="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deleteBtn"><i class="far fa-trash-alt text-white" data-feather="delete"></i> Delete</button>';
+
+                return $btn;
+
+            })
+            ->rawColumns(['Picture','action'])->make(true);
+
+        }
+
+        return response()->view('products',compact('Cat_Select'));
     }
 
     /**
@@ -41,35 +64,54 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
-        //validate input details
-        
-        //store product details
-        $product = new Product;
-
-        $product->Reference_Id = $request->input('Reference_Id');
-        $product->Category = $request->input('Category');
-        $product->Quantity = $request->input('Quantity');
-        $product->Cost_Price = $request->input('Cost_Price');
-        $product->MRP = $request->input('MRP');
-        $product->Purchase_no = $request->input('Purchase_no');
-        $product->Short_Desc = $request->input('Short_Desc');
-
-        if($request->hasFile('Picture'))
+    {   
+        //validate input data
+        $validate = Validator::make($request->all(),[
+            'Name'=>'required',
+            'Category'=>'required',
+            'Reference_Id'=>'required',
+            'MRP'=>'required|numeric',
+            'Unit'=>'required',
+            'Quantity'=>'required|numeric',
+        ]); 
+        if($validate->fails())
         {
-            $file = $request->file('Picture');
-            $extension = $file->getClientOriginalExtension();
-            $Ref_Id = $request->input('Reference_Id');
-            $fileName = $Ref_Id.'.'.$extension;
-            $file->move('Uploads/Product_Pics',$fileName);
-            $product->Picture = $fileName;
+            return response()->json([
+                'status'=>400,
+                'errors'=>$validate->messages()
+            ]);
         }
-        $product->save();
-        if($product->save()){
-            return redirect()->back()->with('status','Product added successfully');
+        else
+        {
+            //store product details
+            $product = new Product;
+            
+            $product->Reference_Id = $request->input('Reference_Id');
+            $product->Category = $request->input('Category');
+            $product->Quantity = $request->input('Quantity');
+            $product->Name = $request->input('Name');
+            $product->MRP = $request->input('MRP');
+            $product->Unit = $request->input('Unit');
+            $product->Short_Desc = $request->input('Short_Desc');
+
+            if($files = $request->file('Picture'))
+            {
+                $file = $request->file('Picture');
+                $extension = $file->getClientOriginalExtension();
+                $Ref_Id = $request->input('Reference_Id');
+                $fileName = date('dmY') .uniqid().'.'.$extension;
+                $file->move('Uploads/Product_Pics',$fileName);
+                $product->Picture = $fileName;
+            }
+            // $product->save();
+            if($product->save())
+            {
+                return response()->json([
+                    'status'=>200,
+                    'message'=>'Product Added successfully']);
+                }
+            }
         }
-        return redirect()->back()->with('status','Product not created successfully');
-    }
 
     /**
      * Display the specified resource.
@@ -102,36 +144,63 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $pro = Product::find($id);
-        
-        $pro->Reference_Id = $request->input('Reference_Id');
-        $pro->Category = $request->input('Category');
-        $pro->Quantity = $request->input('Quantity');
-        $pro->Cost_Price = $request->input('Cost_Price');
-        $pro->MRP = $request->input('MRP');
-        $pro->Purchase_no = $request->input('Purchase_no');
-        $pro->Short_Desc = $request->input('Short_Desc');
-
-        if($request->hasFile('Picture'))
+        //validate input data
+        $Editvalidate = Validator::make($request->all(),[
+            'Name'=>'required',
+            'Category'=>'required',
+            'Reference_Id'=>'required',
+            'MRP'=>'required|numeric',
+            'Unit'=>'required',
+            'Quantity'=>'required|numeric',
+        ]); 
+        // $Editvalidate = $request->validate([
+        //     'Name'=>'required',
+        //     'Category'=>'required',
+        //     'Reference_Id'=>'required',
+        //     'MRP'=>'required|numeric',
+        //     'Unit'=>'required',
+        //     'Quantity'=>'required|numeric',
+        // ]);
+        if($Editvalidate->fails())
         {
-            $destination = 'Uploads/Product_Pics/'.$pro->Picture;
-            if(File::exists($destination))
-            {
-                File::delete($destination);
-            }
-            $file = $request->file('Picture');
-            $extension = $file->getClientOriginalExtension();
-            $Ref_Id = $request->input('Reference_Id');
-            $fileName = $Ref_Id.'.'.time().$extension;
-            $file->move('Uploads/Product_Pics',$fileName);
-            $pro->Picture = $fileName;
+            return response()->json([
+                'status'=>400,
+                'errors'=>$Editvalidate->messages()
+            ]);
         }
-        $pro->update();
-        //  $okay = $pro->update();
-         if($pro->update()){
-             return redirect()->back()->with('status','Purchase updated successfully');
-         }
-             return redirect()->back()->with('status','Purchase Not Updated successfully');
+        else
+        {
+
+            $pro = Product::find($id);
+
+            $pro->Category = $request->input('Category');
+            $pro->Quantity = $request->input('Quantity');
+            $pro->Name = $request->input('Name');
+            $pro->MRP = $request->input('MRP');
+            $pro->Unit = $request->input('Unit');
+            $pro->Short_Desc = $request->input('Short_Desc');
+            
+            if($request->hasFile('Picture'))
+            {
+                $destination = 'Uploads/Product_Pics/'.$pro->Picture;
+                if(File::exists($destination))
+                {
+                    File::delete($destination);
+                }
+                $file = $request->file('Picture');
+                $extension = $file->getClientOriginalExtension();
+                $Ref_Id = $request->input('Reference_Id');
+                $fileName = date('dmY') .uniqid().'.'.$extension;
+                $file->move('Uploads/Product_Pics',$fileName);
+                $pro->Picture = $fileName;
+            }
+             $okay = $pro->update();
+            if($okay){
+                return response()->json([
+                    'status'=>200,
+                    'message'=>'Product Updated successfully']);
+            }
+        }
     }
 
     /**
@@ -151,6 +220,8 @@ class ProductController extends Controller
         }
         $product->delete();
         
-        return redirect()->back()->with('status','Purchase deleted successfully');
+        return response()->json([
+            'status'=>200,
+            'message'=>'Product deleted successfully']);
     }
 }

@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Supplier;
 use Illuminate\Http\Request;
-// use App\Models\Supplier;
+use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Validator;
 
 class SupplierController extends Controller
 {
@@ -17,13 +18,26 @@ class SupplierController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //List down All the Suppliers
-        $show = Supplier::all();
-        return view('suppliers',["showSupplier"=>$show]);
-    }
+        // return view('suppliers');
+        if ($request->ajax()) {
+            $data = Supplier::orderBy("id","desc")->get();
+            return Datatables::of($data)
+            ->addIndexColumn()
+            ->addColumn('action',function($row){
+                $btn = '<button id="edit_Btn" data-toggle="modal" data-target="#EditSupplierModal" value="'.$row->id.'" class="edit btn btn-primary btn-sm editBtn"><i class="fas fa-pen text-white"></i> Edit</button>';
+                $btn = $btn.' <button id="del_Btn" data-toggle="tooltip" value="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deleteBtn"><i class="far fa-trash-alt text-white" data-feather="delete"></i> Delete</button>';
 
+                return $btn;
+
+            })
+            ->rawColumns(['action'])->make(true);
+
+        }
+
+        return view('suppliers');
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -43,25 +57,44 @@ class SupplierController extends Controller
     public function store(Request $request)
     {
         //validate date
-        $ValidatedData = $request->validate([
+        $ValidatedData = Validator::make($request->all(),[
+            'Supplier_Name'=>'required',
+            'Brand_Name'=>'required',
+            'Address'=>'required',
             'Contact' => 'required|numeric',
+            'Email_Id'=>'required|email',
             'GST_No' => 'required|min:15|max:15',
             'Account_No' => 'required|min:9|max:18',
             'IFSC_Code' => 'required|min:11|max:11'
         ]);
-        //store input data
-        $Supplier = Supplier::create($request->all());
-        // $Supplier = new Supplier::find(id);
-        // $Supplier->Supplier_Name = $request->input('Supplier_Name');
-        // $Supplier->Brand_Name = $request->input('Brand_Name');
-        // $Supplier->Address = $request->input('Address');
-        // $Supplier->Contact = $request->input('Contact');
-        // $Supplier->Email_Id = $request->input('Email_Id');
-        // $Supplier->GST_No = $request->input('GST_No');
-        // $Supplier->Account_No = $request->input('Account_No');
-        // $Supplier->IFSC_Code = $request->input('IFSC_Code');
-        // $Supplier->save();
-        return redirect()->back()->with('status','Supplier Created Successfully');
+        if($ValidatedData->fails())
+        {
+            return response()->json([
+                'status'=>400,
+                'errors'=>$ValidatedData->messages(),
+            ]);
+        }
+        else
+        {
+            //store input data
+            $Supplier = Supplier::create($request->all());
+            return response()->json([
+                'status'=>200,
+                'message'=>'Supplier added Successsfully',
+            ]);
+        
+            // $Supplier = new Supplier::find(id);
+            // $Supplier->Supplier_Name = $request->input('Supplier_Name');
+            // $Supplier->Brand_Name = $request->input('Brand_Name');
+            // $Supplier->Address = $request->input('Address');
+            // $Supplier->Contact = $request->input('Contact');
+            // $Supplier->Email_Id = $request->input('Email_Id');
+            // $Supplier->GST_No = $request->input('GST_No');
+            // $Supplier->Account_No = $request->input('Account_No');
+            // $Supplier->IFSC_Code = $request->input('IFSC_Code');
+            // $Supplier->save();
+            // return redirect()->back()->with('status','Supplier Created Successfully');
+        }
     }
 
     /**
@@ -96,15 +129,34 @@ class SupplierController extends Controller
     public function update(Request $request, $id)
     {
         //validate date
-        $ValidatedEditData = $request->validate([
-            'Edit_Contact' => 'required|numeric',
-            'Edit_GST_No' => 'required|min:15|max:15',
-            'Edit_Account_No' => 'required|min:9|max:18',
-            'Edit_IFSC_Code' => 'required|min:11|max:11'
+        $ValidatedEditData = Validator::make($request->all(),[
+            'Supplier_Name'=>'required',
+            'Brand_Name'=>'required',
+            'Address'=>'required',
+            'Contact' => 'required|numeric',
+            'Email_Id'=>'required|email',
+            'GST_No' => 'required|min:15|max:15',
+            'Account_No' => 'required|min:9|max:18',
+            'IFSC_Code' => 'required|min:11|max:11'
         ]);
-
-        // return $request->all();
-        $sup = Supplier::find($id);
+        if($ValidatedEditData->fails())
+        {
+            return response()->json([
+                'status'=>400,
+                'errors'=>$ValidatedEditData->messages(),
+            ]);
+        }
+        else
+        {
+            //update input data
+            $sup = Supplier::find($id);
+            $sup->update($request->all());
+            return response()->json([
+                'status'=>200,
+                'message'=>'Supplier Updated Successsfully',
+            ]);
+        }
+       
         // $Sup->Supplier_Name = $request->input('Supplier_name');
         // $Sup->Brand_Name = $request->input('Brand_Name');
         // $Sup->Address = $request->input('Address');
@@ -113,13 +165,6 @@ class SupplierController extends Controller
         // $Sup->GST_No = $request->input('GST_No');
         // $Sup->Account_No = $request->input('Account_No');
         // $Sup->IFSC_Code = $request->input('IFSC_Code');
-        
-        $okay = $sup->update($request->all());
-        if($okay){
-            return redirect()->back()->with('status','Supplier details Updated Successfully');
-        }
-        return redirect()->back()->with('status','Supplier details Not Updated Successfully');
-
     }
 
     /**
@@ -132,8 +177,12 @@ class SupplierController extends Controller
     {
         //
         $Supplier = Supplier::find($id);
-        $Supplier->delete();
         
-        return redirect()->back()->with('status','Purchase deleted successfully');
+        $Supplier->delete();
+        return response()->json([
+            'status' => 200,
+            'message'=>'Supplier Deleted Successsfully'
+        ]);
+        
     }
 }

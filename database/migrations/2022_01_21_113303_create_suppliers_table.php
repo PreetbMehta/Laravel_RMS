@@ -19,7 +19,7 @@ class CreateSuppliersTable extends Migration
             $table->string('Brand_Name');
             $table->text('Address');
             $table->string('Contact');
-            $table->text('Email_id');
+            $table->text('Email_id')->unique();
             $table->text('GST_No');
             $table->text('Account_No');
             $table->text('IFSC_Code');
