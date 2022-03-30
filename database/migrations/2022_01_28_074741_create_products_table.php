@@ -20,6 +20,7 @@ class CreateProductsTable extends Migration
             $table->string('Name');
             $table->string('Category');
             $table->string('Unit');
+            $table->string('TaxSlab');
             $table->double('MRP');
             $table->bigInteger('Quantity');
             $table->text('Short_Desc');

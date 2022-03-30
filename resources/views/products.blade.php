@@ -47,90 +47,109 @@
             </div>
             <div class="card-body">
                 <div id="error_message"></div>
-                <form action="" method="POST" id="AddProductForm" enctype="multipart/form-data">
-                    @csrf
-                    <div class="row">
-                        <div class="col-md">
-                            <label for="Category">
-                                1)Category
-                            </label>
-                            <select name="Category" id="Category" class="form-control" required>
-                                <option value="">Open this select menu</option>
-                                @foreach ($Cat_Select as $Cat_item)
-                                    <option value="{{ $Cat_item->Name }}">{{ $Cat_item->Name }}</option>
-                                @endforeach
-                                {{-- <option value="2">Two</option>
-                                <option value="3">Three</option> --}}
-                            </select>
+            <form action="" method="POST" id="AddProductForm" enctype="multipart/form-data">
+                @csrf
+                <div class="card-body">
+                    <div id="error_message"></div>
+                        <div class="row">
+                            <div class="col-md">
+                                <label for="Category">
+                                    1)Category
+                                </label>
+                                <select name="Category" id="Category" class="form-control select2 select2bs4 select2-danger" required>
+                                    <option value="">Open this select menu</option>
+                                    @foreach ($Cat_Select as $Cat_item)
+                                        <option value="{{ $Cat_item->Name }}">{{ $Cat_item->Name }}</option>
+                                    @endforeach
+                                    {{-- <option value="2">Two</option>
+                                    <option value="3">Three</option> --}}
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="Name">
-                                <b>2)Name:</b>
-                            </label>
-                            <input type="text" name="Name" id="Name" class="form-control" required>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="Name">
+                                    <b>2)Name:</b>
+                                </label>
+                                <input type="text" name="Name" id="Name" class="form-control" required>
+                            </div>
+                            <div class="col-md">
+                                <label for="Reference_Id">
+                                    <b>3) Reference Id:</b>
+                                </label>
+                                <input type="text" name="Reference_Id" id="Reference_Id" class="form-control" required>
+                            </div>
                         </div>
-                        <div class="col-md">
-                            <label for="Reference_Id">
-                                <b>3) Reference Id:</b>
-                            </label>
-                            <input type="text" name="Reference_Id" id="Reference_Id" class="form-control" required>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="Quantity">
+                                    <b>4) Quantity:</b>
+                                </label>
+                                <input type="number" min="1" step="1" name="Quantity" id="Quantity" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="Alert_Quantity">
+                                    <b>4) Alert Quantity:</b>
+                                </label>
+                                <input type="number" min="1" step="1" name="Alert_Quantity" id="Alert_Quantity" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="MRP">
+                                    <b>5) MRP:</b>
+                                </label>
+                                <input type="number" min="1" step="1" name="MRP" id="MRP" class="form-control" required>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="Quantity">
-                                <b>4) Quantity:</b>
-                            </label>
-                            <input type="number" min="1" step="1" name="Quantity" id="Quantity" class="form-control" required>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="Unit">
+                                    <b>6)Unit:</b>
+                                </label>
+                                <select name="Unit" id="Unit" class="form-control select2 select2bs4 select2-danger" required>
+                                    <option value="">Open this select menu</option>
+                                    <option value="pcs">Pieces(pcs)</option>
+                                    <option value="kg">KiloGram(Kg)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="TaxSlab">
+                                    <b>6)TaxSlab:</b>
+                                </label>
+                                <select name="TaxSlab" id="Edit_TaxSlab" class="form-control select2 select2bs4 select2-danger" required>
+                                    <option value="">Open this select menu</option>
+                                    @foreach ($taxSlab as $taxSlab_item)
+                                        <option value="{{ $taxSlab_item->TaxPercentage }}">{{ $taxSlab_item->TaxPercentage }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label for="MRP">
-                                <b>5) MRP:</b>
-                            </label>
-                            <input type="number" min="1" step="1" name="MRP" id="MRP" class="form-control" required>
+                        <div class="row">
+                            <div class="col-md">
+                                <label for="Short_Desc">
+                                    7)Short Description:
+                                </label>
+                                <textarea name="Short_Desc" id="Short_Desc" class="form-control" rows="5"
+                                    placeholder="Mention Size', 'Color', 'Material',etc attributes if any" required></textarea>
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md">
-                            <label for="Unit">
-                                <b>6)Unit:</b>
-                            </label>
-                            <select name="Unit" id="Unit" class="form-control" required>
-                                <option value="">open this select menu</option>
-                                <option value="pcs">Pieces(pcs)</option>
-                                <option value="kg">KiloGram(Kg)</option>
-                            </select>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="Picture">
+                                    <b>8)Picture:</b>
+                                </label>
+                                <input type="file" name="Picture" id="Picture" class="form-control"
+                                    onchange="return fileValidation()">
+                            </div>
+                            <div class="col-md-6">
+                                <img alt="" id="Preview" style="height: 200px;width:200px;margin-top:15px;">
+                            </div>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md">
-                            <label for="Short_Desc">
-                                7)Short Description:
-                            </label>
-                            <textarea name="Short_Desc" id="Short_Desc" class="form-control" rows="5"
-                                placeholder="Mention Size', 'Color', 'Material',etc attributes if any" required></textarea>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label for="Picture">
-                                <b>8)Picture:</b>
-                            </label>
-                            <input type="file" name="Picture" id="Picture" class="form-control"
-                                onchange="return fileValidation()">
-                        </div>
-                        <div class="col-md-6">
-                            <img alt="" id="Preview" style="height: 200px;width:200px;margin-top:15px;">
-                        </div>
-                    </div>
-            </div>
-            <!-- /.card-body -->
-            <div class="card-footer">
-                <button type="Submit" class="btn btn-success btn-lg" id="Add_Product">Add Product</button>
-            </div>
-            <!-- /.card-footer-->
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer">
+                    <button type="Submit" class="btn btn-success btn-lg" id="Add_Product">Add Product</button>
+                </div>
+                <!-- /.card-footer-->
             </form>
         </div>
         <!-- /.card -->
@@ -150,7 +169,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <table id="Product-Table" class="table table-bordered">
+                <table id="Product-Table" class="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -159,7 +178,9 @@
                             <th>Reference id</th>
                             <th>Category</th>
                             <th>Quantity</th>
+                            <th>Alert_Quantity</th>
                             <th>Unit</th>
+                            <th>TaxSlab</th>
                             <th>MRP</th>
                             <th>Short Description</th>
                             <th>Actions</th>
@@ -174,7 +195,7 @@
     </div>
 
     {{-- #EditProductModal ---------------------------------------------------------------------------- --}}
-    <div class="modal" tabindex="-1" id="EditProductModal">
+    <div class="modal" id="EditProductModal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -219,7 +240,7 @@
                                 <label for="Category">
                                     4)Category
                                 </label>
-                                <select name="Category" id="Edit_Category" class="form-control" required>
+                                <select name="Category" id="Edit_Category" class="form-control select2 select2bs4 select2-danger" required>
                                     <option>Open this select menu</option>
                                     @foreach ($Cat_Select as $Cat_item)
                                         <option value="{{ $Cat_item->Name }}">
@@ -229,36 +250,54 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <label for="Quantity">
-                                    <b>5) Quantity:</b>
-                                </label>
-                                <input type="number" min="1" step="1" name="Quantity" id="Edit_Quantity"
-                                    class="form-control" required>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
                                 <label for="MRP">
                                     <b>6) MRP:</b>
                                 </label>
                                 <input type="number" min="1" step="1" name="MRP" id="Edit_MRP" class="form-control"
                                     required>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="Quantity">
+                                    <b>5) Quantity:</b>
+                                </label>
+                                <input type="number" min="1" step="1" name="Quantity" id="Edit_Quantity" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="Alert_Quantity">
+                                    <b>5) Alert Quantity:</b>
+                                </label>
+                                <input type="number" min="1" step="1" name="Alert_Quantity" id="Edit_Alert_Quantity" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-6">
                                 <label for="Unit">
                                     <b>7)Unit:</b>
                                 </label>
-                                <select name="Unit" id="Edit_Unit" class="form-control" required>
-                                    <option>open this select menu</option>
+                                <select name="Unit" id="Edit_Unit" class="form-control select2 select2bs4 select2-danger" required>
+                                    <option value="">open this select menu</option>
                                     <option value="pcs">Pieces(pcs)</option>
                                     <option value="kg">KiloGram(Kg)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="TaxSlab">
+                                    <b>8)TaxSlab:</b>
+                                </label>
+                                <select name="TaxSlab" id="Edit_TaxSlab" class="form-control select2 select2bs4 select2-danger" required>
+                                    <option>open this select menu</option>
+                                    @foreach ($taxSlab as $taxSlab_item)
+                                        <option value="{{ $taxSlab_item->TaxPercentage }}">{{ $taxSlab_item->TaxPercentage }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md">
                                 <label for="Short_Desc">
-                                    8)Short Description:
+                                    9)Short Description:
                                 </label>
                                 <textarea name="Short_Desc" id="Edit_Short_Desc" class="form-control" rows="5"></textarea>
                             </div>
@@ -288,6 +327,14 @@
                 });
             }
 
+            //initialise select 2
+            $('.select2').select2();
+            
+            //Initialize Select2 Elements
+            $('.select2bs4').select2({
+                theme: 'bootstrap4' 
+            });
+
             $.ajaxSetup({
                 headers:{
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -306,7 +353,9 @@
                     {data: 'Reference_Id',name: 'Reference_Id'},
                     {data: 'Category',name: 'Category'},
                     {data: 'Quantity',name: 'Quantity'},
+                    {data: 'Alert_Quantity',name: 'Alert_Quantity'},
                     {data: 'Unit',name: 'Unit'},
+                    {data: 'TaxSlab',name: 'TaxSlab'},
                     {data: 'MRP',name: 'MRP'},
                     {data: 'Short_Desc',name: 'Short_Desc'},
                     {data: 'action',name: 'action',orderable:false,searchable:false},
@@ -463,17 +512,33 @@
                 console.log("Quantity"+Quantity);
                 $('#Edit_Quantity').val(Quantity);
 
-                var Unit = $(this).parent().parent().children().eq(6).text();
+                var AlertQuantity = $(this).parent().parent().children().eq(6).text();
+                console.log("Alert-Quantity"+AlertQuantity);
+                $('#Edit_Alert_Quantity').val(AlertQuantity);
+
+                var Unit = $(this).parent().parent().children().eq(7).text();
                 console.log("Unit"+Unit);
                 $('#Edit_Unit').val(Unit);
 
-                var MRP = $(this).parent().parent().children().eq(7).text();
+                var taxslab = $(this).parent().parent().children().eq(8).text();
+                console.log("taxslab"+taxslab);
+                $("#EditProductModal #Edit_TaxSlab option[value="+taxslab+"]").attr('selected', 'selected');
+
+                var MRP = $(this).parent().parent().children().eq(9).text();
                 console.log("MRP"+MRP);
                 $('#Edit_MRP').val(MRP);
 
-                var Short_Desc = $(this).parent().parent().children().eq(8).text();
+                var Short_Desc = $(this).parent().parent().children().eq(10).text();
                 console.log("SD"+Short_Desc);
                 $('#Edit_Short_Desc').val(Short_Desc);
+
+                //initialise select 2
+                $('.select2').select2();
+                
+                //Initialize Select2 Elements
+                $('.select2bs4').select2({
+                    theme: 'bootstrap4' 
+                });
             });
         });
     

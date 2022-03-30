@@ -31,6 +31,10 @@ class HomeController extends Controller
         $supplier = Supplier::count();
         $customer = Customer::count();
         $category = category::count();
-        return view('home',['product'=>$product,'supplier'=>$supplier,'customer'=>$customer,'category'=>$category]);
+
+        //alert Quantity Table
+        $proAlert = Product::whereRaw("Alert_Quantity >= Quantity")
+                                ->get(['id','Name','Reference_Id','Quantity','Alert_Quantity']);
+        return view('home',['product'=>$product,'supplier'=>$supplier,'customer'=>$customer,'category'=>$category,'proAlert'=>$proAlert]);
     }
 }

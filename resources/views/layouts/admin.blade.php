@@ -33,13 +33,19 @@
   <!-- jQuery -->
   <script src={{asset("plugins/jquery/jquery.min.js")}}></script>
 
+  {{-- select2 styles --}}
+  <link rel="stylesheet" href="{{asset("/plugins/select2/css/select2.css")}}">
+  <link rel="stylesheet" href="{{asset("/plugins/select2/css/select2.min.css")}}">
+  <link rel="stylesheet" href="{{asset("/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css")}}">
+  <link rel="stylesheet" href="{{asset("/plugins/select2-bootstrap4-theme/select2-bootstrap4.css")}}">
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
   <!-- Preloader -->
   <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
+    <img class="animation__shake" src="{{asset('dist/img/AdminLTELogo.png')}}" alt="AdminLTELogo" height="60" width="60">
   </div>
 
   <!-- Navbar -->
@@ -108,7 +114,7 @@
   <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href={{route('home')}} class="brand-link">
-      <img src="dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <img src="{{asset('dist/img/AdminLTELogo.png')}}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light">RMS System</span>
     </a>
 
@@ -137,8 +143,14 @@
             </a>
           </li>
           <li class="nav-item">
+            <a href={{route("taxSlabMaster.index")}} class="nav-link">
+              <i class="fas fa-chart-pie nav-icon"></i>
+              <p>Tax Slab</p>
+            </a>
+          </li>
+          <li class="nav-item">
             <a href={{route('products.index')}} class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <i class="nav-icon fas fa-chart-pie"></i>
               <p>
                 Products
               </p>
@@ -146,7 +158,7 @@
           </li>
           <li class="nav-item">
             <a href={{route('customers.index')}} class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <i class="nav-icon fas fa-chart-pie"></i>
               <p>
                 Customers
               </p>
@@ -161,14 +173,36 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href={{route('purchase.index')}} class="nav-link">
+            <a href={{route("addPurchase.index")}} class="nav-link">
+              <i class="fas fa-chart-pie nav-icon"></i>
+              <p>Add Purchase</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href={{route('viewPurchase.index')}} class="nav-link">
               <i class="nav-icon fas fa-chart-pie"></i>
               <p>
-                Purchase
+                View Purchase
               </p>
             </a>
           </li>
           <li class="nav-item">
+            <a href={{route('sales.index')}} class="nav-link">
+              <i class="nav-icon fas fa-chart-pie"></i>
+              <p>
+                Add Sale
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/ViewSales" class="nav-link">
+              <i class="nav-icon fas fa-chart-pie"></i>
+              <p>
+                View Sale
+              </p>
+            </a>
+          </li>
+          {{-- <li class="nav-item">
             <a class="nav-link" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
@@ -179,7 +213,7 @@
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                         @csrf
                                     </form>
-          </li>
+          </li> --}}
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -240,8 +274,11 @@
 <!-- JQuery DataTable JS-->
 <script src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
 
-  {{-- sweet alert js --}}
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+{{-- sweet alert js --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+{{-- script to use select2 --------------------------------------------------------------}}
+<script src={{asset("/plugins/select2/js/select2.full.min.js")}} defer></script>
 
 {{-- script to active nav tag dynamically as per the page  --}}
 <script>

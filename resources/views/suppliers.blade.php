@@ -143,7 +143,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <table id="Supplier-Table" class="table table-bordered">
+                <table id="Supplier-Table" class="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>Supplier_id</th>
@@ -181,6 +181,7 @@
                     @csrf
                     @method('put')
                     <div class="modal-body">
+                        <input type="hidden" id="Edit_Item_Id">
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="SupplierName">
@@ -297,8 +298,8 @@
                         name: 'Contact'
                     },
                     {
-                        data: 'Email_Id',
-                        name: 'Email_Id'
+                        data: 'Email_id',
+                        name: 'Email_id'
                     },
                     {
                         data: 'GST_No',
@@ -372,7 +373,7 @@
                 e.preventDefault();
                 $(this).html('Sending...')
 
-                var sup_id = $('.editBtn').val();
+                var sup_id = $('#Edit_Item_Id').val();
                 var Up_data = {
                     'Supplier_Name': $('#Edit_Supplier_Name').val(),
                     'Brand_Name': $('#Edit_Brand_Name').val(),

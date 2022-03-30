@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\category;
+use App\Models\taxSlab;
 use Yajra\DataTables\DataTables;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -24,27 +25,38 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         //
-        $Cat_Select = category::all();//for fetching category names
+        $Cat_Select = category::all(); //for fetching category names
+        $taxSlab = taxSlab::all();
         if ($request->ajax()) {
-            $data = Product::orderBy("id","desc")->get();
+            $data = Product::orderBy("id", "desc")->get();
             return Datatables::of($data)
-            ->addIndexColumn()
-            ->addColumn('Picture',function($row){
-                $url = asset('Uploads/Product_Pics/'.$row->Picture);
-                return '<img src="'.$url.'" border="0" width="100" class="img-rounded" align="center" />';
-            })
-            ->addColumn('action',function($row){
-                $btn = '<button id="edit_Btn" data-toggle="modal" data-target="#EditProductModal" value="'.$row->id.'" class="edit btn btn-primary btn-sm editBtn"><i class="fas fa-pen text-white"></i> Edit</button>';
-                $btn = $btn.' <button id="del_Btn" data-toggle="tooltip" value="'.$row->id.'" data-original-title="Delete" class="btn btn-danger btn-sm deleteBtn"><i class="far fa-trash-alt text-white" data-feather="delete"></i> Delete</button>';
+                ->addIndexColumn()
+                ->addColumn('Picture', function ($row) {
+                    $url = asset('Uploads/Product_Pics/' . $row->Picture);
+                    return '<img src="' . $url . '" border="0" width="100" class="img-rounded" align="center" />';
+                })
+                ->addColumn('Alert_Quantity',function($row){
+                    $val="";
+                    if($row->Quantity<=$row->Alert_Quantity)
+                    {
+                        $val='<span class="badge badge-danger">'.$row->Alert_Quantity.'</span>';
+                    }
+                    else
+                    {
+                        $val =$row->Alert_Quantity;
+                    }
+                    return $val;
+                })
+                ->addColumn('action', function ($row) {
+                    $btn = '<button id="edit_Btn" data-toggle="modal" data-target="#EditProductModal" value="' . $row->id . '" class="edit btn btn-primary btn-sm editBtn"><i class="fas fa-pen text-white"></i> Edit</button>';
+                    $btn = $btn . ' <button id="del_Btn" data-toggle="tooltip" value="' . $row->id . '" data-original-title="Delete" class="btn btn-danger btn-sm deleteBtn"><i class="far fa-trash-alt text-white" data-feather="delete"></i> Delete</button>';
 
-                return $btn;
-
-            })
-            ->rawColumns(['Picture','action'])->make(true);
-
+                    return $btn;
+                })
+                ->rawColumns(['Picture','Alert_Quantity', 'action'])->make(true);
         }
 
-        return response()->view('products',compact('Cat_Select'));
+        return response()->view('products', compact('Cat_Select', 'taxSlab'));
     }
 
     /**
@@ -64,54 +76,53 @@ class ProductController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {   
+    {
         //validate input data
-        $validate = Validator::make($request->all(),[
-            'Name'=>'required',
-            'Category'=>'required',
-            'Reference_Id'=>'required',
-            'MRP'=>'required|numeric',
-            'Unit'=>'required',
-            'Quantity'=>'required|numeric',
-        ]); 
-        if($validate->fails())
-        {
+        $validate = Validator::make($request->all(), [
+            'Name' => 'required',
+            'Category' => 'required',
+            'Reference_Id' => 'required',
+            'MRP' => 'required|numeric',
+            'Unit' => 'required',
+            'TaxSlab' => 'required',
+            'Quantity' => 'required|numeric',
+        ]);
+        if ($validate->fails()) {
             return response()->json([
-                'status'=>400,
-                'errors'=>$validate->messages()
+                'status' => 400,
+                'errors' => $validate->messages()
             ]);
-        }
-        else
-        {
+        } else {
             //store product details
             $product = new Product;
-            
+
             $product->Reference_Id = $request->input('Reference_Id');
             $product->Category = $request->input('Category');
             $product->Quantity = $request->input('Quantity');
+            $product->Alert_Quantity = $request->input('Alert_Quantity');
             $product->Name = $request->input('Name');
             $product->MRP = $request->input('MRP');
             $product->Unit = $request->input('Unit');
+            $product->TaxSlab = $request->input('TaxSlab');
             $product->Short_Desc = $request->input('Short_Desc');
 
-            if($files = $request->file('Picture'))
-            {
+            if ($files = $request->file('Picture')) {
                 $file = $request->file('Picture');
                 $extension = $file->getClientOriginalExtension();
                 $Ref_Id = $request->input('Reference_Id');
-                $fileName = date('dmY') .uniqid().'.'.$extension;
-                $file->move('Uploads/Product_Pics',$fileName);
+                $fileName = date('dmY') . uniqid() . '.' . $extension;
+                $file->move('Uploads/Product_Pics', $fileName);
                 $product->Picture = $fileName;
             }
-            // $product->save();
-            if($product->save())
-            {
+            $product->save();
+            if ($product->save()) {
                 return response()->json([
-                    'status'=>200,
-                    'message'=>'Product Added successfully']);
-                }
+                    'status' => 200,
+                    'message' => 'Product Added successfully'
+                ]);
             }
         }
+    }
 
     /**
      * Display the specified resource.
@@ -145,14 +156,15 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
         //validate input data
-        $Editvalidate = Validator::make($request->all(),[
-            'Name'=>'required',
-            'Category'=>'required',
-            'Reference_Id'=>'required',
-            'MRP'=>'required|numeric',
-            'Unit'=>'required',
-            'Quantity'=>'required|numeric',
-        ]); 
+        $Editvalidate = Validator::make($request->all(), [
+            'Name' => 'required',
+            'Category' => 'required',
+            'Reference_Id' => 'required',
+            'MRP' => 'required|numeric',
+            'Unit' => 'required',
+            'TaxSlab' => 'required',
+            'Quantity' => 'required|numeric',
+        ]);
         // $Editvalidate = $request->validate([
         //     'Name'=>'required',
         //     'Category'=>'required',
@@ -161,44 +173,43 @@ class ProductController extends Controller
         //     'Unit'=>'required',
         //     'Quantity'=>'required|numeric',
         // ]);
-        if($Editvalidate->fails())
-        {
+        if ($Editvalidate->fails()) {
             return response()->json([
-                'status'=>400,
-                'errors'=>$Editvalidate->messages()
+                'status' => 400,
+                'errors' => $Editvalidate->messages()
             ]);
-        }
-        else
-        {
+        } else {
 
             $pro = Product::find($id);
 
             $pro->Category = $request->input('Category');
             $pro->Quantity = $request->input('Quantity');
+            $pro->Alert_Quantity = $request->input('Alert_Quantity');
             $pro->Name = $request->input('Name');
             $pro->MRP = $request->input('MRP');
             $pro->Unit = $request->input('Unit');
+            $pro->TaxSlab = $request->input('TaxSlab');
+            $pro->Reference_Id = $request->input('Reference_Id');
             $pro->Short_Desc = $request->input('Short_Desc');
-            
-            if($request->hasFile('Picture'))
-            {
-                $destination = 'Uploads/Product_Pics/'.$pro->Picture;
-                if(File::exists($destination))
-                {
+
+            if ($request->hasFile('Picture')) {
+                $destination = 'Uploads/Product_Pics/' . $pro->Picture;
+                if (File::exists($destination)) {
                     File::delete($destination);
                 }
                 $file = $request->file('Picture');
                 $extension = $file->getClientOriginalExtension();
                 $Ref_Id = $request->input('Reference_Id');
-                $fileName = date('dmY') .uniqid().'.'.$extension;
-                $file->move('Uploads/Product_Pics',$fileName);
+                $fileName = date('dmY') . uniqid() . '.' . $extension;
+                $file->move('Uploads/Product_Pics', $fileName);
                 $pro->Picture = $fileName;
             }
-             $okay = $pro->update();
-            if($okay){
+            $okay = $pro->update();
+            if ($okay) {
                 return response()->json([
-                    'status'=>200,
-                    'message'=>'Product Updated successfully']);
+                    'status' => 200,
+                    'message' => 'Product Updated successfully'
+                ]);
             }
         }
     }
@@ -213,15 +224,15 @@ class ProductController extends Controller
     {
         //
         $product = Product::find($id);
-        $destination = 'Uploads/Product_Pics/'.$product->Picture;
-        if(File::exists($destination))
-        {
+        $destination = 'Uploads/Product_Pics/' . $product->Picture;
+        if (File::exists($destination)) {
             File::delete($destination);
         }
         $product->delete();
-        
+
         return response()->json([
-            'status'=>200,
-            'message'=>'Product deleted successfully']);
+            'status' => 200,
+            'message' => 'Product deleted successfully'
+        ]);
     }
 }

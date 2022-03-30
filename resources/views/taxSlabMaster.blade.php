@@ -1,7 +1,6 @@
 @extends('layouts.admin')
 
 @section('content')
-
     <!-- JQuery DataTables css-->
     <link rel="stylesheet" href="//cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
 
@@ -10,12 +9,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Categories</h1>
+                    <h1 class="m-0">Tax Slabs</h1>
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Categories</li>
+                        <li class="breadcrumb-item active">TaxSlabs</li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
@@ -26,7 +25,7 @@
     <div class="content">
         <div class="card">
             <div class="card-header">
-                <h3>Add Category</h3>
+                <h3>Add Tax Slab</h3>
 
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
@@ -36,22 +35,22 @@
             </div>
             <div class="card-body">
                 <div id="error_message"></div>
-                <form action={{ route('categories.store') }} method="post" id="addCatForm">
+                <form action={{ route('taxSlabMaster.store') }} method="post" id="addCatForm">
                     @csrf
                     <div class="form-group">
                         <div class="row">
                             <div class="col-md-3">
                                 <label>
-                                    <h5>Title</h5>
+                                    <h5>TaxSlab</h5>
                                 </label>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" name="Name" id="Name" class="form-control" required>
+                                <input type="number" name="TaxPercentage" id="TaxPercentage" class="form-control" required>
                             </div>
                         </div>
                     </div>
                     <div class="form-group" style="align-content: center">
-                        <input type="Submit" class="btn btn-info" value="Add Category" id="AddCategory">
+                        <input type="Submit" class="btn btn-info" value="Add TaxSlab" id="AddTaxSlab">
                     </div>
                 </form>
             </div>
@@ -62,7 +61,7 @@
     <div class="content">
         <div class="card">
             <div class="card-header">
-                <h3 class="mb-0">Category List</h3>
+                <h3 class="mb-0">TaxSlab List</h3>
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                         <i class="fas fa-minus"></i>
@@ -70,16 +69,16 @@
                 </div>
             </div>
             <div class="card-body">
-                <table class="table table-bordered table-striped" id="Category-Table">
+                <table class="table table-bordered table-striped" id="TaxSlab-Table">
                     <thead>
                         <tr>
-                            <th style="text-align: center">#</th>
-                            <th style="text-align:center">Name</th>
+                            <th style="text-align: center">Id</th>
+                            <th style="text-align:center">TaxSlab</th>
                             <th style="text-align:center">Action</th>
                         </tr>
                     </thead>
                     <tbody id="table_body">
-                            
+
                     </tbody>
                 </table>
             </div>
@@ -87,12 +86,13 @@
     </div>
 
     {{-- #EditCategoriesModal ---------------------------------------------------------------------------- --}}
-    <div class="modal" tabindex="-1" id="EditCategoryModal" aria-hidden="true">
+    <div class="modal" tabindex="-1" id="EditTaxSlabModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit Category</h5>
-                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
+                    <h5 class="modal-title">Edit TaxSlab</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
                 </div>
                 <form action="" method="POST" id="editForm">
                     @csrf
@@ -102,11 +102,10 @@
                         <div class="row">
                             <input type="hidden" name="id" id="Edit_id">
                             <div class="col-md-6">
-                                <label for="Edit_Name">
-                                    <b>1)Category Name:</b>
+                                <label for="Edit_TaxSlab">
+                                    <b>1)TaxSlab:</b>
                                 </label>
-                                <input type="text" name="Edit_Name" id="Edit_Name" 
-                                    class="form-control" required>              
+                                <input type="text" name="Edit_TaxSlab" id="Edit_TaxSlab" class="form-control" required>
                             </div>
                         </div>
                     </div>
@@ -118,7 +117,6 @@
             </div>
         </div>
     </div>
-
     {{-- Scripts-------------------------------------------------------------------------- --}}
 
     <!-- JQuery DataTable JS-->
@@ -137,29 +135,29 @@
                 }
             });
             //fetchData through ajax>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            var table = $('#Category-Table').DataTable({
+            var table = $('#TaxSlab-Table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: "{{ route('categories.index') }}",
+                ajax: "{{ route('taxSlabMaster.index') }}",
                 columns : [
                     {data:'id',name:'id',orderable:false,searchable:false},
-                    {data:'Name',name:'Name'},
+                    {data:'TaxPercentage',name:'TaxPercentage'},
                     {data: 'action', name: 'action', orderable: false, searchable: false},
                 ],
                 // order: [ [0, 'desc'] ]
             });
 
              //store data with ajax>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-             $('#AddCategory').click(function (e) {
+             $('#AddTaxSlab').click(function (e) {
                 e.preventDefault();
                 $(this).html('Sending..');
             
                 var data_to_store = {
-                    'Name':$('#Name').val()
+                    'TaxPercentage':$('#TaxPercentage').val()
                 }
                 $.ajax({
                     type: "POST",
-                    url: "{{route('categories.store')}}",
+                    url: "{{route('taxSlabMaster.store')}}",
                     data: data_to_store,
                     dataType: 'json',
                     success: function (response) {
@@ -197,11 +195,11 @@
             
                 var data_to_update = {
                     'id' : $('#Edit_id').val(),
-                    'Name':$('#Edit_Name').val()
+                    'TaxPercentage':$('#Edit_TaxSlab').val()
                 }
                 $.ajax({
                     type: "PUT",
-                    url: "categories/"+ product_id,
+                    url: "taxSlabMaster/"+ product_id,
                     data: data_to_update,
                     dataType: 'json',
                     success: function (response) {
@@ -218,7 +216,7 @@
                             $('#Edit_error_message').html("");
                             $('#Edit_error_message').removeClass("alert alert-danger");
                             $('#editForm').trigger("reset");
-                            $('#EditCategoryModal').modal('hide');
+                            $('#EditTaxSlabModal').modal('hide');
                             table.draw(false);
                             Success_Sweet_Alert(response.message);
                             $('#EditChanges').html('Save Changes');
@@ -234,10 +232,10 @@
 
             //delete data with ajax>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             $(document).on('click', '.deleteBtn', function (){
-            var category_id = $(this).val();
+            var taxSlab_id = $(this).val();
             var name = $(this).parent().parent().children().eq(1).text();
             //sweet alert
-            swal("Are You sure want to delete "+name+" category with id "+category_id+" !?","","warning",{
+            swal("Are You sure want to delete "+name+" taxSlab with id "+taxSlab_id+" !?","","warning",{
                 buttons:{
                     cancel: "Cancel",
                     yes: "Yes! Delete"
@@ -246,7 +244,7 @@
                         case "yes":
                             $.ajax({
                                 type: "DELETE",
-                                url: "categories/"+category_id,
+                                url: "taxSlabMaster/"+taxSlab_id,
                                 success: function (response) {
                                     Success_Sweet_Alert(response.message);
                                     table.draw(false);
@@ -272,7 +270,7 @@
                 $('#Edit_id').val(id);
                 // console.log(id);
                 var C =  $(this).parent().parent().children().eq(1).text();
-                $('#Edit_Name').val(C);
+                $('#Edit_TaxSlab').val(C);
                 // console.log(C);
 
                 // var test = $(".side_Nav_Category").addClass('active');

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCustomersTable extends Migration
+class CreateTaxSlabsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class CreateCustomersTable extends Migration
      */
     public function up()
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('tax_slabs', function (Blueprint $table) {
             $table->id();
-            $table->string('Customer_Name');
-            $table->string('Contact');
-            $table->string('Email_Id');
+            $table->string('TaxPercentage');
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ class CreateCustomersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('tax_slabs');
     }
 }

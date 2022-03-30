@@ -80,7 +80,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <table class="table table-bordered" id="Customer-Table">
+                <table class="table table-bordered table-striped" id="Customer-Table">
                     <thead>
                         <tr>
                             <th>Customer Id</th>

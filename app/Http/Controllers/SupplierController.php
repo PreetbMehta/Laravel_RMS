@@ -150,6 +150,8 @@ class SupplierController extends Controller
         {
             //update input data
             $sup = Supplier::find($id);
+            // print_r($request->all());
+            // return false;
             $sup->update($request->all());
             return response()->json([
                 'status'=>200,

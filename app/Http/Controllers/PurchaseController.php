@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Purchase;
 use App\Models\Supplier;
+use App\Models\Product;
+use App\Models\Purchase_Detail;
+use App\Models\Purchase_Overview;
 use Illuminate\Http\Request;
 use DB;
+use Illuminate\Support\Facades\Validator;
 
 class PurchaseController extends Controller
 {
@@ -22,9 +25,9 @@ class PurchaseController extends Controller
     public function index()
     {
         //
-        $show = Purchase::all();
-        $show_supp = Supplier::all();
-        return view('purchase',['showPurchase'=>$show],['Show_supp'=>$show_supp]);
+        $show = Product::select('id','Name','TaxSlab')->orderBy('Name','asc')->get();
+        $show_supp = Supplier::select('id','Supplier_Name','Brand_Name')->get();
+        return view('addPurchase',['showProduct'=>$show,'Show_supp'=>$show_supp]);
     }
 
     /**
@@ -46,12 +49,73 @@ class PurchaseController extends Controller
     public function store(Request $request)
     {
         //
-        $purchase = Purchase::create($request->all());
+            // $request->validate([
+            //     //purchase overview fields validation
+            //     'Date_Of_Purchase'=>'required|date',
+            //     'Supplier_Id'=>'required',
+            //     'Total_Products' => 'required|numeric',
+            //     'Total_Tax_Amount' => 'required|numeric',
+            //     'Total_Amount' => 'required|numeric',
+            //     //purchase detail fields validations
+            //     'PurchaseProductId' => 'required',
+            //     'PurchaseQuantity' => 'required',
+            //     'PurchasePrice' => 'required',
+            //     'PurchaseTaxSlab' => 'required',
+            //     'PurchaseTaxAmount' => 'required',
+            //     'PurchaseSubTotal' => 'required'
+            // ]);
+            // print_r($request->all());
+            $validatedData = Validator::make($request->all(),[
+                // purchase overview fields validation
+                'Date_Of_Purchase'=>'required|date',
+                'Supplier_Id'=>'required',
+                'TotalTaxAmount' => 'required|numeric',
+                'TotalAmount' => 'required|numeric',
+                //purchase detail fields validations
+                'PurchaseProductId' => 'required',
+                'PurchaseQuantity' => 'required',
+                'PurchasePrice' => 'required',
+                'PurchaseTaxSlab' => 'required',
+                'PurchaseTaxAmount' => 'required',
+                'PurchaseSubTotal' => 'required'
+            ]);
+            if($validatedData->fails())
+            {
+                return redirect()->back()->with('errors',$validatedData->messages());
+            }
+            else
+            {
+                //store data in order overview ----------------------------------------------
+                $purchase_Overview = new Purchase_Overview;
+                $purchase_Overview->Date_Of_Purchase = $request->input('Date_Of_Purchase');
+                $purchase_Overview->Supplier_Id = $request->input('Supplier_Id');
+                $purchase_Overview->Sub_Total = $request->input('TotalSubTotal');
+                $purchase_Overview->Total_Tax_Amount = $request->input('TotalTaxAmount');
+                $purchase_Overview->Total_Amount = $request->input('TotalAmount');
+                $purchase_Overview->Discount_Amount = $request->input('DiscountAmount');
+                $purchase_Overview->Total_Products = count($request->input('PurchaseProductId'));
+                $purchase_Overview->save();
 
-        if($purchase){
-            return redirect()->back()->with('status','Purchase added successfully');
-        }
-        return redirect()->back()->with('status','Purchase not created successfully');
+                //store data in purchase details ---------------------------------------------
+                $insert_id = $purchase_Overview->id;//get insert id of above added record
+                $no_of_products = count($request->input('PurchaseProductId'));
+                // echo($no_of_products);
+                // return false;
+                
+                for($i=0; $i<intval($no_of_products); $i++)
+                {
+                    $purchase_detail = new Purchase_Detail;
+                    $purchase_detail->Purchase_Id = $insert_id;
+                    $purchase_detail->Product_Id = $request->PurchaseProductId[$i];
+                    $purchase_detail->Price = $request->PurchasePrice[$i];
+                    $purchase_detail->Quantity = $request->PurchaseQuantity[$i];
+                    $purchase_detail->Tax_Slab = $request->PurchaseTaxSlab[$i];
+                    $purchase_detail->Tax_Amount = $request->PurchaseTaxAmount[$i];
+                    $purchase_detail->Sub_Total = $request->PurchaseSubTotal[$i];
+                    $purchase_detail->save();
+                }
+                return redirect()->back()->with("status","Purchase Added Successfully");
+            }
     }
 
     /**
@@ -60,7 +124,7 @@ class PurchaseController extends Controller
      * @param  \App\Models\Purchase  $purchase
      * @return \Illuminate\Http\Response
      */
-    public function show(Purchase $purchase)
+    public function show(Purchase_Detail $purchase)
     {
         //
     }
@@ -71,7 +135,7 @@ class PurchaseController extends Controller
      * @param  \App\Models\Purchase  $purchase
      * @return \Illuminate\Http\Response
      */
-    public function edit(Purchase $purchase)
+    public function edit(Purchase_Detail $purchase)
     {
         //
     }
@@ -85,20 +149,7 @@ class PurchaseController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $pur = Purchase::find($id);
-
-        // $pur->Date_Of_Purchase = $request->input('Date_Of_Purchase');
-        // $pur->Supplier_Name = $request->input('Supplier_Name');
-        // $pur->Supplier_Id = $request->input('Supplier_Id');
-        // $pur->Quantity = $request->input('Quantity');
-        // $pur->Total_Bill_Amount = $request->input('Total_Bill_Amount');
-        // $pur->GST_Amount = $request->input('GST_Amount');
-
-        $okay = $pur->update($request->all());
-        if($okay){
-            return redirect()->back()->with('status','Purchase updated successfully');
-        }
-            return redirect()->back()->with('status','Purchase Not Updated successfully');
+        //
     }
 
     /**
@@ -110,15 +161,5 @@ class PurchaseController extends Controller
     public function destroy($id)
     {
         //
-        $purchase = Purchase::find($id);
-        $purchase->delete();
-        
-        return redirect()->back()->with('status','Purchase deleted successfully');
-    }
-
-    public function getBrandBySupplier($post)
-    {
-        $Sup_Name = Supplier::find($post);
-
     }
 }

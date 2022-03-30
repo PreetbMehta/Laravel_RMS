@@ -85,6 +85,40 @@
         </div>
         <!-- ./col -->
       </div>
+      {{-- alert quantity table ================================================================--}}
+      <div class="card card-primary alert-quantity-table w-50">
+        <div class="card-header">
+          <h3 class="card-title">Alert Quantity Products</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <!-- /.card-header -->
+        <div class="card-body">
+          <table class="table table-bordered table-striped">
+            <thead>
+              <th>#</th>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Alert Quantity</th>
+            </thead>
+            <tbody>
+              @foreach ($proAlert as $item)
+                  <tr>
+                    <td>{{$item->id}}</td>
+                    <td>{{$item->Name}}({{$item->Reference_Id}})</td>
+                    <td>{{$item->Quantity}}</td>
+                    <td>{{$item->Alert_Quantity}}</td>
+                  </tr>
+              @endforeach
+            </tbody>
+          </table>
+        </div>
+        <!-- /.card-body -->
+      </div>
   </section>
   <!-- /.content -->
   <!-- JQVMap -->
