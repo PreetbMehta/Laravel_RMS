@@ -22,7 +22,9 @@
     </div>
 
     @if (session('status'))
-        <div class="alert alert-success">{{ session('status') }}</div>
+        <script>
+            swal('Success!',"{{Session('status')}}",'success',{button:'OK'});
+        </script>
     @endif
     @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>

@@ -8,11 +8,17 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Sales_Overview;
 use App\Models\Sales_Details;
+use App\Models\Tracker_Table;
 
 use Illuminate\Http\Request;
 
 class SalesController extends Controller
-{
+{   //authenticate
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -70,6 +76,7 @@ class SalesController extends Controller
     {
         //
         // return $request->all();
+        //inserting sales overview for sales bills-----------------------------------------
         $sale_over = new Sales_Overview;
         $sale_over->Date_Of_Sale = $request->input('Date_Of_Sale');
         $sale_over->Customer_Id = $request->Customer_Id;
@@ -92,6 +99,7 @@ class SalesController extends Controller
         $no_of_products = count($request->SalesProduct);//count the total no of products to run for loop as many times 
         $insert_id = $sale_over->id;//get the insert id of above data as foreign key in sale_detail table
 
+        //inserting sales details in sales bills----------------------------------------
         for($i=0; $i<intval($no_of_products); $i++)
         {
             $sale_det = new Sales_Details;
@@ -108,7 +116,46 @@ class SalesController extends Controller
             // $pro->Quantity -= $request->SalesQuantity[$i];
             // $pro->update();
         }
-        return redirect()->back()->with('status','Sale Added Successfully');
+        // print_r($sale_over->Payment_Method);
+        
+        //inserting in tracker table for every sales
+        if($sale_over->Payment_Method == 'Credit')
+        {
+            $tracker_table = new Tracker_Table;
+            $tracker_table->Date = $sale_over->Date_Of_Sale;
+            $tracker_table->Cust_Id = $sale_over->Customer_Id;
+            $tracker_table->Sales_Id = $insert_id;
+            $tracker_table->Amount = $sale_over->Total_Amount;
+            $tracker_table->Type = '0';
+            $tracker_table->Payment_Method = $sale_over->Payment_Method;
+            $tracker_table->save();
+        }
+        else if($sale_over->Payment_Method == 'Cash'||$sale_over->Payment_Method == 'Card'||$sale_over->Payment_Method == 'UPI')
+        {
+            //inserting for type=0 entry on sales
+            $tracker_table = new Tracker_Table;
+            $tracker_table->Date = $sale_over->Date_Of_Sale;
+            $tracker_table->Cust_Id = $sale_over->Customer_Id;
+            $tracker_table->Sales_Id = $insert_id;
+            $tracker_table->Amount = $sale_over->Total_Amount;
+            $tracker_table->Type = '0';
+            $tracker_table->Payment_Method = 'Bill Generate';
+            $tracker_table->save();
+
+            //inserting for type-1 entry on sales
+            $tracker_table = new Tracker_Table;
+            $tracker_table->Date = $sale_over->Date_Of_Sale;
+            $tracker_table->Cust_Id = $sale_over->Customer_Id;
+            $tracker_table->Sales_Id = $insert_id;
+            $tracker_table->Amount = -$sale_over->Total_Amount;
+            $tracker_table->Type = '1';
+            $tracker_table->Payment_Method = $sale_over->Payment_Method;
+            $tracker_table->save();
+        }
+        if($sale_over && $sale_det && $tracker_table)
+        {
+            return redirect()->back()->with('status','Sale Added Successfully');
+        }
     }
 
     /**
@@ -209,7 +256,43 @@ class SalesController extends Controller
             // $pro->Quantity -= $request->SalesQuantity[$i];
             // $pro->update();
         }
-        return redirect('ViewSales')->with('status','Sale Added Successfully');
+        //adding entry of tracker_table
+        if($request->Payment_Radio == 'Credit')
+        {
+            $track = Tracker_Table::where('Sales_Id',$id)
+                                ->where('Type','0')
+                                ->update(['Payment_Method'=>$request->Payment_Radio,'Amount'=>$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
+
+            $tdel = Tracker_Table::where('Sales_Id',$id)
+                                ->where('Type','1')
+                                ->Delete();
+        }
+        else
+        {
+            if($request->Pay_Meth == 'Credit')
+            {
+                $track1 = Tracker_Table::where('Sales_Id',$id)
+                                ->where('Type','0')
+                                ->update(['Payment_Method'=>'Bill Generate','Amount'=>$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
+
+                                
+                $trackAdd = new Tracker_Table;
+                $trackAdd->Date = $request->Date_Of_Sale;
+                $trackAdd->Cust_Id = $request->Customer_Id;
+                $trackAdd->Sales_Id = $id;
+                $trackAdd->Amount = -$request->TotalAmount;
+                $trackAdd->Type = '1';
+                $trackAdd->Payment_Method = $request->Payment_Radio;
+                $trackAdd->save();
+            }
+            else
+            {
+                $track1 = Tracker_Table::where('Sales_Id',$id)
+                                    ->where('Type','1')
+                                    ->update(['Payment_Method'=>$request->Payment_Radio,'Amount'=>-$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
+            }
+        }
+        return redirect('ViewSales')->with('status','Sale Updated Successfully');
     }
 
     //delete sales row from edit sales
@@ -246,5 +329,20 @@ class SalesController extends Controller
         else{
             return redirect()->back()->with('error','Sale not deleted successfully');
         }
+    }
+
+    //add new customer while adding sales\making bills
+    public function addNewCust(Request $request)
+    {
+        $cust_new = new Customer;
+        $cust_new->Customer_Name = $request->NewCust_Customer_Name;
+        $cust_new->Contact = $request->NewCust_Contact;
+        $cust_new->Email_Id = $request->NewCust_Email_Id;
+        $cust_new->save();
+    
+            if($cust_new)
+            {
+                return redirect()->back()->with('status','New Customer Added Successfully');
+            }
     }
 }

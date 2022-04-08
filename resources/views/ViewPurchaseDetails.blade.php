@@ -35,15 +35,19 @@
             </div> --}}
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-2 ml-5">
+                    <div class="col-md-3">
                         <label for="Purchase_No">1)Purchase No.:</label>
                         <input type="text" name="Purchase_No" id="Purchase_No" class="form-control" value="{{$id}}" readonly>
                     </div>
-                    <div class="col-md-4 ml-5">
+                    <div class="col-md-3">
                         <label for="Supplier_Name">2)Supplier Name:</label>
                         <input type="text" name="Supplier_Name" id="Supplier_Name" class="form-control" value="{{$sup[0]->Supplier_Name}}" readonly>
                     </div>
-                    <div class="col-md-4 ml-5">
+                    <div class="col-md-3">
+                        <label for="Brand_Name">2)Brand Name:</label>
+                        <input type="text" name="Brand_Name" id="Brand_Name" class="form-control" value="{{$sup[0]->Brand_Name}}" readonly>
+                    </div>
+                    <div class="col-md-3">
                         <label for="Date_Of_Purchase">3)Date of Purchase:</label>
                         <input type="text" name="Date_Of_Purchase" id="Date_Of_Purchase" class="form-control" value="{{$pur_Overview[0]->Date_Of_Purchase}}" readonly>
                     </div>
@@ -54,7 +58,7 @@
                             <th style="text-align: center">#</th>
                             <th style="text-align: center">Product</th>
                             <th style="text-align: center" class="w-5">Price</th>
-                            <th style="text-align: center" class="w-5">Quantity</th>
+                            <th style="text-align: center" class="w-5">Quantity Ordered</th>
                             <th style="text-align: center" class="w-5">Tax Slab</th>
                             <th style="text-align: center" class="w-5">Tax Amount</th>
                             <th style="text-align: center" class="w-5">Total</th>

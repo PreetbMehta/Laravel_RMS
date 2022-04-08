@@ -113,9 +113,9 @@
                             </div>
                             <div class="col-md-6">
                                 <label for="TaxSlab">
-                                    <b>6)TaxSlab:</b>
+                                    <b>7)TaxSlab:</b>
                                 </label>
-                                <select name="TaxSlab" id="Edit_TaxSlab" class="form-control select2 select2bs4 select2-danger" required>
+                                <select name="TaxSlab" id="TaxSlab" class="form-control select2 select2bs4 select2-danger" required>
                                     <option value="">Open this select menu</option>
                                     @foreach ($taxSlab as $taxSlab_item)
                                         <option value="{{ $taxSlab_item->TaxPercentage }}">{{ $taxSlab_item->TaxPercentage }}</option>
@@ -126,7 +126,7 @@
                         <div class="row">
                             <div class="col-md">
                                 <label for="Short_Desc">
-                                    7)Short Description:
+                                    8)Short Description:
                                 </label>
                                 <textarea name="Short_Desc" id="Short_Desc" class="form-control" rows="5"
                                     placeholder="Mention Size', 'Color', 'Material',etc attributes if any" required></textarea>
@@ -135,7 +135,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <label for="Picture">
-                                    <b>8)Picture:</b>
+                                    <b>9)Picture:</b>
                                 </label>
                                 <input type="file" name="Picture" id="Picture" class="form-control"
                                     onchange="return fileValidation()">
@@ -391,6 +391,7 @@
                             $('#error_message').html("");
                             $('#error_message').removeClass('alert alert-danger');
                             $('#AddProductForm').trigger("reset");
+                            $('#AddProductForm .select2').trigger('change')//to reset select menus
                             $('#Preview').attr('src','');
                             table.draw();//table.ajax.reload():can also be used here***
                             $('#Add_Product').html('Add Product');

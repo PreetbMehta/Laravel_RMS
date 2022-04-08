@@ -165,9 +165,15 @@
             $('.Cash_Details').css('display','none');
             $('.UPI_Details').css('display','none');
         }
-        else
+        else if(pay_meth == 'UPI')
         {
             $('.UPI_Details').css('display','block');
+            $('.Cash_Details').css('display','none');
+            $('.Card_Details').css('display','none');
+        }
+        else
+        {
+            $('.UPI_Details').css('display','none');
             $('.Cash_Details').css('display','none');
             $('.Card_Details').css('display','none');
         }

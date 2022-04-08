@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
+
  <!-- Content Header (Page header) -->
  <div class="content-header">
     <div class="container-fluid">
@@ -24,7 +25,7 @@
     <div class="container-fluid">
       <!-- Small boxes (Stat box) -->
       <div class="row">
-        <div class="col-lg-3 col-6">
+        <div class="col-lg-2 col-6">
           <!-- small box -->
           <div class="small-box bg-info">
             <div class="inner">
@@ -39,7 +40,7 @@
           </div>
         </div>
         <!-- ./col -->
-        <div class="col-lg-3 col-6">
+        <div class="col-lg-2 col-6">
           <!-- small box -->
           <div class="small-box bg-success">
             <div class="inner">
@@ -54,7 +55,7 @@
           </div>
         </div>
         <!-- ./col -->
-        <div class="col-lg-3 col-6">
+        <div class="col-lg-2 col-6">
           <!-- small box -->
           <div class="small-box bg-warning">
             <div class="inner">
@@ -69,7 +70,7 @@
           </div>
         </div>
         <!-- ./col -->
-        <div class="col-lg-3 col-6">
+        <div class="col-lg-2 col-6">
           <!-- small box -->
           <div class="small-box bg-danger">
             <div class="inner">
@@ -81,6 +82,34 @@
               <i class="ion ion-pie-graph"></i>
             </div>
             <a href={{route('categories.index')}} class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-6">
+          <!-- small box -->
+          <div class="small-box bg-warning">
+            <div class="inner">
+              <h3>{{$purchase}}</h3>
+
+              <p>Total Purchase Bills</p>
+            </div>
+            <div class="icon">
+              <i class="ion ion-clipboard"></i>
+            </div>
+            <a href={{route('viewPurchase.index')}} class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+          </div>
+        </div>
+        <div class="col-lg-2 col-6">
+          <!-- small box -->
+          <div class="small-box bg-info">
+            <div class="inner">
+              <h3>{{$sale}}</h3>
+
+              <p>Total Sale Bills</p>
+            </div>
+            <div class="icon">
+              <i class="ion ion-calendar"></i>
+            </div>
+            <a href={{url('/ViewSales')}} class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
         <!-- ./col -->
@@ -97,21 +126,24 @@
           </div>
         </div>
         <!-- /.card-header -->
-        <div class="card-body">
-          <table class="table table-bordered table-striped">
+        <div class="card-body h-25">
+          <h5 class="total_alerts small-box p-2 mb-1 bg-info float-right">
+            Total Alerts:{{count($proAlert)}}
+          </h5>
+          <table class="table table-bordered table-striped" id="Alert_Table">
             <thead>
               <th>#</th>
               <th>Product</th>
               <th>Quantity</th>
               <th>Alert Quantity</th>
             </thead>
-            <tbody>
+            <tbody class="overflow-y-auto">
               @foreach ($proAlert as $item)
                   <tr>
                     <td>{{$item->id}}</td>
                     <td>{{$item->Name}}({{$item->Reference_Id}})</td>
                     <td>{{$item->Quantity}}</td>
-                    <td>{{$item->Alert_Quantity}}</td>
+                    <td><span class="bg-danger p-1">{{$item->Alert_Quantity}}</span></td>
                   </tr>
               @endforeach
             </tbody>

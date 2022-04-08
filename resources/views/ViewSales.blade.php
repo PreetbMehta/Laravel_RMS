@@ -1,12 +1,13 @@
 @extends('layouts.admin')
 
 @section('content')
-
     <style>
-        #ViewSalesTable th,td{
+        #ViewSalesTable th,
+        td {
             text-align: center;
             overflow: hidden;
         }
+
     </style>
     <!-- Content Header (Page header) -->
     <div class="content-header">
@@ -25,6 +26,13 @@
         </div><!-- /.container-fluid -->
     </div>
 
+    @if (Session('status'))
+        <script>
+            swal('Success!', "{{ Session('status') }}", 'success', {
+                button: 'OK'
+            });
+        </script>
+    @endif
     <div class="content">
         <div class="card">
             <div class="card-body">
@@ -42,28 +50,35 @@
                         <th>Action</th>
                     </thead>
                     <tbody>
-                        @foreach ($sale_overview as $so)  
+                        @foreach ($sale_overview as $so)
                             <tr>
-                                <td>{{$so->id}}</td>
-                                <td>{{$so->Date_Of_Sale}}</td>
-                                <td>{{$so->Customer_Name}}</td>
-                                <td>{{$so->Contact}}</td>
-                                <td>{{$so->Total_Products}}</td>
-                                <td>{{$so->Total_Tax_Amount}}</td>
-                                <td>{{$so->Discount_Amount}}</td>
-                                <td>{{$so->Total_Amount}}</td>
-                                <td>{{$so->Payment_Method}}</td>
+                                <td>{{ $so->id }}</td>
+                                <td>{{ $so->Date_Of_Sale }}</td>
+                                <td>{{ $so->Customer_Name }}</td>
+                                <td>{{ $so->Contact }}</td>
+                                <td>{{ $so->Total_Products }}</td>
+                                <td>{{ $so->Total_Tax_Amount }}</td>
+                                <td>{{ $so->Discount_Amount }}</td>
+                                <td>{{ $so->Total_Amount }}</td>
+                                <td>{{ $so->Payment_Method }}</td>
                                 <td style="display: flex">
-                                    <a href="{{url("viewSales/".$so->id)}}" class="btn btn-primary m-2" data-bs-toggle="tooltip" title="View">
+                                    <a href="{{ url('viewSales/' . $so->id) }}" class="btn btn-primary m-2"
+                                        data-bs-toggle="tooltip" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{url('sales/'.$so->id.'/edit')}}" class="btn btn-primary m-2" data-bs-toggle="tooltip" title="Edit">
+                                    <a href="{{ url('sales/' . $so->id . '/edit') }}" class="btn btn-primary m-2"
+                                        data-bs-toggle="tooltip" title="Edit">
                                         <i class="fas fa-pencil-alt"></i>
                                     </a>
-                                    <form action="{{url('sales/'.$so->id)}}" method="POST">
+                                    <a href="{{ route('returnOrder.show', $so->id) }}" class="btn btn-primary m-2"
+                                        data-bs-toggle="tooltip" title="Return Order">
+                                        <i class="ion ion-loop"></i>
+                                    </a>
+                                    <form action="{{ url('sales/' . $so->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-l m-2" data-bs-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
+                                        <button type="submit" class="btn btn-danger btn-l m-2" data-bs-toggle="tooltip"
+                                            title="Delete"><i class="fas fa-trash"></i></button>
                                     </form>
                                 </td>
                             </tr>
@@ -75,9 +90,9 @@
     </div>
 
     <script>
-        $(document).ready(function(){
+        $(document).ready(function() {
             $('#ViewSalesTable').DataTable({
-                order:['0','desc']
+                order: ['0', 'desc']
             });
         });
     </script>

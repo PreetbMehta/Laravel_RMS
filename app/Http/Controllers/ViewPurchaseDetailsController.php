@@ -12,6 +12,12 @@ use DB;
 
 class ViewPurchaseDetailsController extends Controller
 {
+    //authentication
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
     /**
      * Display a listing of the resource.
      *
@@ -29,7 +35,7 @@ class ViewPurchaseDetailsController extends Controller
         // echo($pur_Overview);
 
         $Supid = $pur_Overview[0]->Supplier_Id;
-        $sup = Supplier::select('Supplier_Name','Brand_Name','Address','Contact','Email_id')
+        $sup = Supplier::select('Supplier_Name','Brand_Name')
                             ->where('id',$Supid)
                             ->get();
         // echo($sup);return false;

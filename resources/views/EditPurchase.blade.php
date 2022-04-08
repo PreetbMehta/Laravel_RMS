@@ -51,12 +51,8 @@
                 @endif
                 @if(session('status'))
                     <script>
-                        $('#error_message').removeClass("alert alert-danger");
+                        swal('Success!',"{{Session('status')}}",'success',{button:'OK'});
                     </script>
-                    <div class="success_message alert alert-success alert-dismissible fade show" role="alert">
-                        {{session('status')}}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
                 @endif
                 <!--input csrf token on post request-->
                 {{-- <input type="hidden" id="CSRF_Token" value="{{csrf_token()}}"> --}}
@@ -107,6 +103,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="Purchase_tbody">
+                                        <input type="hidden" name="Total_Products" id="Total_Products" value="{{$pur_over->Total_Products}}">
                                         @foreach($pur_det as $pur_item)
                                             <tr>
                                                 <td>
@@ -249,12 +246,14 @@
         }
     });
 
+    var count = $('#Total_Products').val(); //initialize counter variable to count number of rows/products ordered
+
     //delete row on click on del product
     $(document).on('click','.DelProduct',function(){
         var row_id = $(this).attr('data-rowId');
         console.log(row_id);
         var tr = $(this).closest('tr');
-        var name = $(this).closest('tr').children('.PurchaseProduct').find('selected').text();
+        var name = tr.find('.PurchaseProduct :selected').attr('data-name');
         if(row_id)
         {
             count-=1;
@@ -267,7 +266,7 @@
             }
             else
             {
-                swal('Alert',"Are you sure you want to  delete this Purchase of"+name+"?",'warning',{buttons:{
+                swal('Alert',"Are you sure you want to  delete this Purchase of "+name+"?",'warning',{buttons:{
                     cancel:"Cancel",
                     yes:"YES,Delete!"
                     }}).then((value)=>{

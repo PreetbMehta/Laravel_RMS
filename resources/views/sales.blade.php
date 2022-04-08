@@ -1,6 +1,7 @@
 @extends('layouts.admin')
 
 @section('content')
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <style>
         #Sales_Table {
             table-layout: fixed;
@@ -11,6 +12,13 @@
         #Sales_Table th,td{
             overflow: hidden;
             text-align: center;
+        }
+        /* .AddMoreProduct:focus, */
+        /* .DelProduct:focus, */
+        .AddMoreProduct:hover,
+        .DelProduct:hover{
+            transform: scale(1.25);
+            margin: 1px;
         }
     </style>
 
@@ -43,9 +51,12 @@
                     </div>
                     <div class="card-body">
                         @if (Session('status'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{-- <div class="alert alert-success alert-dismissible fade show" role="alert">
                                 {{Session('status')}} <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
+                            </div> --}}
+                            <script>
+                                swal('Success!',"{{Session('status')}}",'success',{button:'OK'});
+                            </script>
                         @endif
                         <!--first row of info -->
                         <div class="row">
@@ -61,6 +72,7 @@
                                     <b>Customer Name:</b>
                                     <span style="color: red">*</span>
                                 </label>
+                                <a class="btn btn-sm btn-primary float-right" id="AddNewCustomer" data-toggle="modal" data-target="#AddCustomerModal"><span class="ion ion-person-add"></span> Add New</a>
                                 <select name="Customer_Id" id="Customer_Id"
                                     class="form-control select2 select2bs4 select2-danger" required>
                                     <option value="">Open this select menu</option>
@@ -74,7 +86,7 @@
                                 <label for="Contact">
                                     <b>Contact No:</b>
                                 </label>
-                                <input type="text" name="Contact" id="Contact" class="form-control" required readonly>
+                                <input type="text" name="Contact" id="Contact" class="form-control" required>
                             </div>
                         </div>
                         <div class="card m-2">
@@ -131,10 +143,10 @@
                                                     readonly>
                                             </td>
                                             <td style="width: 60px">
-                                                <span class=" btn btn-sm btn-danger rounded-3 btnSpan DelProduct"><i
-                                                        class="fas fa-times mt-2 btnI"></i></span>
-                                                <span class=" btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct"
-                                                    style="display: none"><i class="fas fa-plus mt-2 btnI"></i></span>
+                                                <a tabindex="0" class=" btn btn-sm btn-danger rounded-3 btnSpan DelProduct"><i
+                                                        class="fas fa-times mt-2 btnI"></i></a>
+                                                <a tabindex="0" class=" btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct"
+                                                    style="display: none"><i class="fas fa-plus mt-2 btnI"></i></a>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -200,6 +212,8 @@
                                 <label for="Card_Radio">Card</label>
                                 <input type="radio" value="UPI" name="Payment_Radio" class="Payment_Radio ml-4 mt-2" id="UPI_Radio" required>
                                 <label for="UPI_Radio">UPI</label>
+                                <input type="radio" value="Credit" name="Payment_Radio" class="Payment_Radio ml-4 mt-2" id="Credit_Radio" required>
+                                <label for="Credit_Radio">Credit</label>
                             </div>
                         </div>
                         <div id="Cash_Details">
@@ -235,6 +249,56 @@
             </div>
         </div>
     </form>
+    {{-- add new customer modal--------------------------------------------------------------- --}}
+    <div class="modal" id="AddCustomerModal" >
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Customer</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div id="edit_error_message"></div>
+                <form action="addNewCustomer" method="POST" id="AddNewCustForm">
+                    @csrf
+                    @method('POST')
+                    <div class="modal-body">
+                        <input type="hidden" id="Edit_id">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="NewCust_Customer_Name">
+                                    <b>1)Customer Name:</b>
+                                </label>
+                                <input type="text" name="NewCust_Customer_Name" id="NewCust_Customer_Name" 
+                                    class="form-control">              
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="NewCust_Contact">
+                                    <b>2)Contact:</b>
+                                </label>
+                                <input type="text" name="NewCust_Contact" id="NewCust_Contact" 
+                                    class="form-control">              
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="NewCust_Email_Id">
+                                    <b>3)Email Id:</b>
+                                </label>
+                                <input type="text" name="NewCust_Email_Id" id="NewCust_Email_Id" 
+                                    class="form-control">              
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" id="AddCustomer" class="btn btn-primary">Add Customer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     {{-- imported scripts--------------------------------------------------------------------- --}}
 
@@ -253,6 +317,13 @@
             // console.log(contact);
             $('#Contact').val(contact);
         });
+
+        //setting customer on the basis of contact
+        $('Contact').on('input',function(){
+            var contact = $(this).val();
+            var c = $('#Customer_Id option["data-contact"]').val();
+            console.log(c);
+        })
 
         $(document).ready(function() {
             //initialise select 2
@@ -366,8 +437,8 @@
                                                             <input type="text" class="form-control SalesSubTotal" name="SalesSubTotal[]" readonly>\
                                                         </td>\
                                                         <td style="width: 60px">\
-                                                            <span class=" btn btn-sm btn-danger rounded-3 btnSpan DelProduct"><i class="fas fa-times mt-2 btnI"></i></span>\
-                                                            <span class=" btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct" style="display: none"><i class="fas fa-plus mt-2 btnI"></i></span>\
+                                                            <a class=" btn btn-sm btn-danger rounded-3 btnSpan DelProduct"><i class="fas fa-times mt-2 btnI"></i></a>\
+                                                            <a class=" btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct" style="display: none"><i class="fas fa-plus mt-2 btnI"></i></a>\
                                                         </td>\
                                                     </tr>');
                 count = count + 1;
@@ -380,7 +451,7 @@
                 $('.select2bs4').select2({
                     theme: 'bootstrap4'
                 });
-                //remove class of red cross and add classes of green plus to the last row of tbody
+                //remove green plus from everywhere and add it only in the last row
                 $('#Sales_Table tbody tr:last td:last .AddMoreProduct').css('display', 'inline-block');
                 $(this).css('display', 'none');
             });
@@ -403,7 +474,7 @@
                 $('#Sales_Table tbody tr:last td:last .AddMoreProduct').css('display', 'inline-block');
             });
 
-             //setting value of mrp and tax on change of product and calculate subtotal taxamount
+            //setting value of mrp and tax on change of product and calculate subtotal taxamount
             $(document).on('change', '.SalesProduct', function() {
                 var row = $(this).closest('tr');
                 // var mrp = row.find('.SalesProduct :selected').attr('data-MRP');
@@ -493,7 +564,7 @@
                 //making other input fields not required
                 $('#Cash_Details input').attr('required',false);
                 $('#Card_Details input').attr('required',false);
-            } else {
+            } else if(radioVal== 'Cash'){
                 $('#Cash_Details').css('display', 'block');
                 $('#Card_Details').css('display', 'none');
                 $('#UPI_Details').css('display', 'none');
@@ -508,8 +579,23 @@
                 //making other input fields not required
                 $('#Card_Details input').attr('required',false);
                 $('#UPI_Details input').attr('required',false);
+            }else {
+                //making display of all blocks none on radio val 'credit'
+                $('#Cash_Details').css('display', 'none');
+                $('#Card_Details').css('display', 'none');
+                $('#UPI_Details').css('display', 'none');
+
+                //making other input fields not required
+                $('#Cash_Details input').attr('required',false);
+                $('#Card_Details input').attr('required',false);
+                $('#UPI_Details input').attr('required',false);
+
+                //making other inputs empty
+                $('#Card_Details input').val("");
+                $("#UPI_Details input").val("");
+                $("#Cash_Details input").val("");
             }
-        })
+        });
 
         //calculating returning amount on input of paid amount
         $(document).on('input','#Amount_Paid',function(){

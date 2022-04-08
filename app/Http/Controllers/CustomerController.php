@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
 {
+    //authentication
     public function __construct()
     {
         $this->middleware('auth');
@@ -155,7 +156,7 @@ class CustomerController extends Controller
         $del_cust->delete();
         return response()->json([
             'status' => 200,
-            'message'=>'Supplier Deleted Successsfully'
+            'message'=>'Customer Deleted Successsfully'
         ]);
     }
 }

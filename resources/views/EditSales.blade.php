@@ -18,7 +18,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1 class="m-0">Add Sales</h1>
+                        <h1 class="m-0">Edit Sales</h1>
                     </div><!-- /.col -->
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
@@ -191,13 +191,15 @@
                                 <h6><b>Payment Method:</b></h6>
                                 {{-- radio options --}}
                                 <div class="form-group">
-                                    <input type="hidden" id="Pay_Meth" value="{{$sales_overview[0]->Payment_Method}}">
+                                    <input type="hidden" id="Pay_Meth" name="Pay_Meth" value="{{$sales_overview[0]->Payment_Method}}">
                                     <input type="radio" value="Cash" name="Payment_Radio" class="Payment_Radio ml-4 mt-2" id="Cash_Radio" required>
                                     <label for="Cash_Radio">Cash</label>
                                     <input type="radio" value="Card" name="Payment_Radio" class="Payment_Radio ml-4 mt-2" id="Card_Radio" required>
                                     <label for="Card_Radio">Card</label>
                                     <input type="radio" value="UPI" name="Payment_Radio" class="Payment_Radio ml-4 mt-2" id="UPI_Radio" required>
                                     <label for="UPI_Radio">UPI</label>
+                                    <input type="radio" value="Credit" name="Payment_Radio" class="Payment_Radio ml-4 mt-2" id="Credit_Radio" required>
+                                    <label for="Credit_Radio">Credit</label>
                                 </div>
                             </div>
                             <div id="Cash_Details" style="display: none">
@@ -529,7 +531,7 @@
                     //making other input fields not required
                     $('#Cash_Details input').attr('required',false);
                     $('#Card_Details input').attr('required',false);
-                } else {
+                }else if(radioVal== 'Cash'){
                     $('#Cash_Details').css('display', 'block');
                     $('#Card_Details').css('display', 'none');
                     $('#UPI_Details').css('display', 'none');
@@ -544,8 +546,23 @@
                     //making other input fields not required
                     $('#Card_Details input').attr('required',false);
                     $('#UPI_Details input').attr('required',false);
+                }else {
+                    //making display of all blocks none on radio val 'credit'
+                    $('#Cash_Details').css('display', 'none');
+                    $('#Card_Details').css('display', 'none');
+                    $('#UPI_Details').css('display', 'none');
+
+                    //making other input fields not required
+                    $('#Cash_Details input').attr('required',false);
+                    $('#Card_Details input').attr('required',false);
+                    $('#UPI_Details input').attr('required',false);
+
+                    //making other inputs empty
+                    $('#Card_Details input').val("");
+                    $("#UPI_Details input").val("");
+                    $("#Cash_Details input").val("");
                 }
-            })
+            });
 
             //calculating returning amount on input of paid amount
             $(document).on('input','#Amount_Paid',function(){

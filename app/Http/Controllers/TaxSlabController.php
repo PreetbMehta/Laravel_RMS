@@ -132,7 +132,7 @@ class TaxSlabController extends Controller
                 // return redirect()->back()->with('status','Category updated successfully');
                 return response()->json([
                     'status' => 200,
-                    'message'=> 'Category updated successfully'
+                    'message'=> 'TaxSlab updated successfully'
                 ]);
             }
         }
@@ -147,12 +147,12 @@ class TaxSlabController extends Controller
     public function destroy($id)
     {
         //
-        $taxSlab = category::find($id);
+        $taxSlab = taxSlab::find($id);
         $taxSlab->delete();
         
         return response()->json([
             'status'=>200,
-            'message'=>'Category deleted successfully'
+            'message'=>'TaxSlab deleted successfully'
         ]);
     }
 }

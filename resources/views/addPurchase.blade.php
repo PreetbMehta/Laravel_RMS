@@ -73,12 +73,9 @@
                     </div>
                 @endif
                 @if(session('status'))
-                    <script>
-                        $('#error_message').removeClass("alert alert-danger");
-                    </script>
-                    <div class="success_message alert alert-success alert-dismissible fade show" role="alert">
-                        {{session('status')}}
-                    </div>
+                <script>
+                    swal('Success!',"{{Session('status')}}",'success',{button:'OK'});
+                </script>
                 @endif
                 <!--input csrf token on post request-->
                 {{-- <input type="hidden" id="CSRF_Token" value="{{csrf_token()}}"> --}}
@@ -125,7 +122,7 @@
                                             <th style="width: 120px">Tax Slab(%)</th>
                                             <th style="width: 120px">Tax Amount</th>
                                             <th style="width: 200px">SubTotal</th>
-                                            <th style="width: 60px"></th>
+                                            <th style="width: 90px"></th>
                                         </tr>
                                     </thead>
                                     <tbody id="Purchase_tbody">
@@ -158,7 +155,8 @@
                                                 <input type="text" class="form-control PurchaseSubTotal" name="PurchaseSubTotal[]" readonly>
                                             </td>
                                             <td style="width: 60px">
-                                                <span class=" btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct"><i class="fas fa-plus mt-2 btnI"></i></span>
+                                                <a class=" btn btn-sm btn-danger rounded-3 btnSpan DelPurchase"><i class="fas fa-times mt-2 btnI"></i></a>
+                                                <a class=" btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct" style="display: none"><i class="fas fa-plus mt-2 btnI"></i></a>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -249,20 +247,17 @@
         });
         
         $(document).ready(function(){
+            //add green plus to the last row of adding product
+            $('#Purchase-Table tbody tr:last td:last .AddMoreProduct').css('display', 'inline-block');
 
            var count = 1;//counter for no of rows
 
            //on click adding new row dynamically
-           $(document).on('click','.AddMoreProduct',function(){
-                $(this).addClass('DelPurchase');//add del class
-                $(this).removeClass('AddMoreProduct');//remove add class
-                $(this).removeClass('btn-success');//remove btn-success class
-                $(this).addClass('btn-danger');//add btn-danger class
-                $('.btnI').removeClass('fa-plus');//remove plus class
-                $('.btnI').addClass('fa-times');//add times class
+           $(document).on('click','.AddMoreProduct',function(e){
+               e.preventDefault(e);
                 
                 count += 1;//counting no. of rows
-                console.log(count);
+                console.log("After Row Add count: "+count);
                 //appending new row
                 $('#Purchase_tbody').append('<tr>\
                                         <td>\
@@ -292,16 +287,21 @@
                                             <input type="text" class="form-control PurchaseSubTotal" name="PurchaseSubTotal[]" readonly>\
                                         </td>\
                                         <td style="width: 60px">\
-                                            <span class=" btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct"><i class="fas fa-plus mt-2 btnI"></i></span>\
+                                            <a class=" btn btn-sm btn-danger rounded-3 btnSpan DelPurchase"><i class="fas fa-times mt-2 btnI"></i></a>\
+                                            <a class=" btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct" style="display: none"><i class="fas fa-plus mt-2 btnI"></i></a>\
                                         </td>\
-                                    </tr>')
-                                    //initialise select 2
-                                    $('.select2').select2();
+                                    </tr>');
+                //initialise select 2
+                $('.select2').select2();
         
-                                    //Initialize Select2 Elements
-                                    $('.select2bs4').select2({
-                                        theme: 'bootstrap4' 
-                                    });
+                //Initialize Select2 Elements
+                $('.select2bs4').select2({
+                    theme: 'bootstrap4' 
+                });
+
+                //remove green plus from everywhere and add it only in the last row
+                $('#Purchase-Table tbody tr:last td:last .AddMoreProduct').css('display', 'inline-block');
+                $(this).css('display', 'none');
            });
            //initialise select 2
            $('.select2').select2();
@@ -317,6 +317,10 @@
                count -=1;//decrease row count
                console.log("After Del Row: "+count);
                row.remove();
+
+               //add green plus to the last row of adding product
+                $('#Purchase-Table tbody tr:last td:last .AddMoreProduct').css('display', 'inline-block');
+                
                TotalCalculate();
            });
 
