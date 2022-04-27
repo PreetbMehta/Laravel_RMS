@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTrackerTablesTable extends Migration
+class CreateProductTrackersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,12 @@ class CreateTrackerTablesTable extends Migration
      */
     public function up()
     {
-        Schema::create('tracker_tables', function (Blueprint $table) {
+        Schema::create('product_trackers', function (Blueprint $table) {
             $table->id();
             $table->date('Date');
-            $table->integer('Cust_Id');
-            $table->integer('Sales_Id');
-            $table->double('Amount');
+            $table->integer('Product_Id');
+            $table->integer('Quantity');
             $table->integer('Type');
-            $table->string('Payment_Method');
-            $table->text('Note');
-            $table->integer('Status');
             $table->timestamps();
         });
     }
@@ -34,6 +30,6 @@ class CreateTrackerTablesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tracker__tables');
+        Schema::dropIfExists('product_trackers');
     }
 }

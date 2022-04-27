@@ -89,8 +89,8 @@
                 </div>
                     <div class="content m-3">
                         <div class="card">
-                            <div class="card-body">
-                                <table class="table table-bordered table-stripped" id="Purchase-Table">
+                            <div class="card-body table-responsive">
+                                <table class="table table-bordered table-stripped dtr-inline" id="Purchase-Table">
                                     <thead>
                                         <tr>
                                             <th>Product <span style="color: red">*</span></th>
@@ -116,7 +116,7 @@
                                                                 <option value="{{ $Product_Item->id }}" data-name={{$Product_Item->Name}} data-id="{{ $Product_Item->id }}" data-TaxSlab="{{$Product_Item->TaxSlab}}" {{$Product_Item->id==$pur_item->Product_Id?'selected':""}} >{{ $Product_Item->Name }}</option>
                                                             @endforeach
                                                         </select>
-                                                        {{-- <input type="hidden" name="PurchaseProductId[]" class="PurchaseProductId"> --}}
+                                                        <input type="hidden" name="OldProductId[]" class="OldProductId" value="{{$pur_item->Product_Id}}">
                                                     </div>
                                                 </td>
                                                 <td style="width: 120px">
@@ -194,272 +194,292 @@
         <!--/.card-->
     </div>
     <script>
-    $(document).ready(function(){
-        //initialise select 2
-        $('.select2').select2();
-        
-        //Initialize Select2 Elements
-        $('.select2bs4').select2({
-            theme: 'bootstrap4' 
+        $(document).ready(function(){
+            //initialise select 2
+            $('.select2').select2();
+            
+            //Initialize Select2 Elements
+            $('.select2bs4').select2({
+                theme: 'bootstrap4' 
+            });
+
+            //remove class of red cross and add classes of green plus to the last row of tbody
+            $('#Purchase_tbody tr:last td:last .AddMoreProduct').css('display','inline-block');
+
+            //set brand name according to supplier name
+            var brand = $('#Supplier_Name :selected').data('brand');
+            $('#Brand_Name').val(brand);
+            var id = $('#Supplier_Name :selected').data('id');
+            $('#Supplier_Id').val(id);
+            $('#Supplier_Name').on('change',function(){
+                var brand = $('#Supplier_Name :selected').data('brand');
+                $('#Brand_Name').val(brand);
+                var id = $('#Supplier_Name :selected').data('id');
+                $('#Supplier_Id').val(id);
+            });
+            
+            // set tax slab value as per product selected
+            $(document).on('input','.PurchaseProduct', function() {
+                        var row = $(this).closest('tr');
+                        var selectTaxSlab = row.find(".PurchaseProduct :selected").attr("data-TaxSlab");
+                        var selectProductId = row.find(".PurchaseProduct :selected").attr("data-id");
+                        console.log(selectTaxSlab);
+                        row.find(".PurchaseTaxSlab").val(selectTaxSlab);
+                        row.find(".PurchaseProductId").val(selectProductId);
+                        
+                        var price = row.find('.PurchasePrice').val();
+                        var qty = row.find('.PurchaseQuantity').val();
+                        
+                        var subTotal = qty * parseFloat(price);
+                        console.log(qty + '\t' + price + '\t' + subTotal);
+                        row.find(".PurchaseSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
+                        
+                        //calculating tax amount
+                        var taxslab = row.find('.PurchaseTaxSlab').val();
+                        taxAmt = parseFloat((taxslab*price*qty)/100);
+                        row.find('.PurchaseTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
+                        console.log(taxAmt);
+                        TotalCalculate();
+            });
         });
 
-        //remove class of red cross and add classes of green plus to the last row of tbody
-        $('#Purchase_tbody tr:last td:last .AddMoreProduct').css('display','inline-block');
+        //calculate discount percentage based on discount amount
+        $(function(){
+            dis = $('#DiscountAmount').val();
+            console.log(dis);
+            total = $('#TotalSubTotal').val();
+            console.log(total);
+            disper = (dis*100)/total;
+            console.log(disper);
+            $('#DiscountPer').val(disper.toFixed(2));
+        });
 
-    });
-    //set brand name according to supplier name
-    var brand = $('#Supplier_Name :selected').data('brand');
-    $('#Brand_Name').val(brand);
-    var id = $('#Supplier_Name :selected').data('id');
-    $('#Supplier_Id').val(id);
-    $('#Supplier_Name').on('change',function(){
-        var brand = $('#Supplier_Name :selected').data('brand');
-        $('#Brand_Name').val(brand);
-        var id = $('#Supplier_Name :selected').data('brand');
-        $('#Supplier_Id').val(id);
-    });
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
 
-    // set tax slab value as per product selected
-    $(document).on('input','.PurchaseProduct', function() {
-                var row = $(this).closest('tr');
-                var selectTaxSlab = row.find(".PurchaseProduct :selected").attr("data-TaxSlab");
-                var selectProductId = row.find(".PurchaseProduct :selected").attr("data-id");
-                console.log(selectTaxSlab);
-                row.find(".PurchaseTaxSlab").val(selectTaxSlab);
-                row.find(".PurchaseProductId").val(selectProductId);
-    });
+        var count = $('#Total_Products').val(); //initialize counter variable to count number of rows/products ordered
+        console.log("count Start: "+count);
 
-    //calculate discount percentage based on discount amount
-    $(function(){
-        dis = $('#DiscountAmount').val();
-        console.log(dis);
-        total = $('#TotalSubTotal').val();
-        console.log(total);
-        disper = (dis*100)/total;
-        console.log(disper);
-        $('#DiscountPer').val(disper.toFixed(2));
-    });
-
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-
-    var count = $('#Total_Products').val(); //initialize counter variable to count number of rows/products ordered
-
-    //delete row on click on del product
-    $(document).on('click','.DelProduct',function(){
-        var row_id = $(this).attr('data-rowId');
-        console.log(row_id);
-        var tr = $(this).closest('tr');
-        var name = tr.find('.PurchaseProduct :selected').attr('data-name');
-        if(row_id)
-        {
-            count-=1;
-             console.log(count);
-            if(count<=0)
+        //delete row on click on del product
+        $(document).on('click','.DelProduct',function(){
+            var row_id = $(this).attr('data-rowId');
+            console.log(row_id);
+            var tr = $(this).closest('tr');
+            var name = tr.find('.PurchaseProduct :selected').attr('data-name');
+            if(row_id)
             {
-                alert("All rows Can't be Deleted \n Minimum one row should be there");
-                count += 1;
-                console.log("After Del Row: " + count);
+                count-=1;
+                console.log(count);
+                if(count<=0)
+                {
+                    alert("All rows Can't be Deleted \n Minimum one row should be there");
+                    count++;
+                    console.log("After Del Row: " + count);
+                }
+                else
+                {
+                    swal('Alert',"Are you sure you want to  delete this Purchase of "+name+"?",'warning',{buttons:{
+                        cancel:"Cancel",
+                        yes:"YES,Delete!"
+                        }}).then((value)=>{
+                            switch(value){
+                                case 'yes':
+                                        $.ajax({
+                                            type: "DELETE",
+                                            url: "/EditPurchase/"+row_id,
+                                            success: function (response) {
+                                                tr.closest('tr').remove();
+                                                swal("Great",response.message,"success",{button:"OK"});
+                                                //remove red cross and add green plus to the last row of tbody
+                                                $('#Purchase_tbody tr:last td:last .AddMoreProduct').css('display','inline-block');
+                                                TotalCalculate();
+                                            },
+                                            error: function (response) {
+                                                console.log('Error:', response);
+                                                swal("Something went wrong","warning",{button:"OK"});
+                                            }
+                                        });
+                                        break;
+                                default: 
+                                        swal(name+" Purchase Item Not Deleted!!","","warning");
+                                        count++;
+                                        console.log("row del cancel count:"+count);
+                                        break;
+                            }
+                        });
+                }
             }
             else
             {
-                swal('Alert',"Are you sure you want to  delete this Purchase of "+name+"?",'warning',{buttons:{
-                    cancel:"Cancel",
-                    yes:"YES,Delete!"
-                    }}).then((value)=>{
-                        switch(value){
-                            case 'yes':
-                                    $.ajax({
-                                        type: "DELETE",
-                                        url: "/EditPurchase/"+row_id,
-                                        success: function (response) {
-                                            tr.closest('tr').remove();
-                                            swal("Great",response.message,"success",{button:"OK"});
-                                            //remove red cross and add green plus to the last row of tbody
-                                            $('#Purchase_tbody tr:last td:last .AddMoreProduct').css('display','inline-block');
-                                            TotalCalculate();
-                                        },
-                                        error: function (response) {
-                                            console.log('Error:', response);
-                                            swal("Something went wrong","warning",{button:"OK"});
-                                        }
-                                    });
-                                    break;
-                                default: 
-                                    swal(name+" Purchase Item Not Deleted!!","","warning");
-                                    break;
-                        }
-                    });
+                $(this).closest('tr').remove();
+                //remove red cross and add green plus to the last row of tbody
+                $('#Purchase_tbody tr:last td:last .AddMoreProduct').css('display','inline-block');
+                TotalCalculate();
             }
-        }
-        else
-        {
-            $(this).closest('tr').remove();
+        });
+
+        //add row on click on add more product
+        $(document).on('click','.AddMoreProduct',function(){
+            $('#Purchase_tbody').append('<tr>\
+                                                    <td>\
+                                                        <input type="hidden" name="RowId[]" class="RowId" value="0">\
+                                                        <div class="form-group">\
+                                                            <select name="PurchaseProduct[]" class="form-control select2 select2bs4 select2-danger PurchaseProduct" data-dropdown-css-class="select2-danger" style="width: 100%;" required>\
+                                                                <option value=\
+                                                                "">open to select product</option>\
+                                                                @foreach ($showProduct as $Product_Item)\
+                                                                    <option value="{{ $Product_Item->id }}" data-id="{{ $Product_Item->id }}" data-TaxSlab="{{$Product_Item->TaxSlab}}">{{ $Product_Item->Name }}</option>\
+                                                                @endforeach\
+                                                            </select>\
+                                                            <input type="hidden" name="OldProductId[]" class="PurchaseProductId" value="{{$pur_item->Product_Id}}">\
+                                                        </div>\
+                                                    </td>\
+                                                    <td style="width: 120px">\
+                                                        <input type="number" min="1" class="form-control PurchaseQuantity" name="PurchaseQuantity[]" required>\
+                                                    </td>\
+                                                    <td style="width: 120px">\
+                                                        <input type="number" min="0.01" step="0.01" class="form-control PurchasePrice" name="PurchasePrice[]" required>\
+                                                    </td>\
+                                                    <td style="width: 120px">\
+                                                        <input type="number" class="form-control PurchaseTaxSlab" name="PurchaseTaxSlab[]" readonly>\
+                                                    </td>\
+                                                    <td style="width: 120px">\
+                                                        <input type="number" class="form-control PurchaseTaxAmount" name="PurchaseTaxAmount[]" readonly>\
+                                                    </td>\
+                                                    <td style="width: 200px">\
+                                                        <input type="text" class="form-control PurchaseSubTotal" name="PurchaseSubTotal[]" readonly>\
+                                                    </td>\
+                                                    <td style="width: 100px;text-align:center">\
+                                                        <span class="mt-2 btn btn-sm btn-danger rounded-3 btnSpan DelProduct"><i class="fas fa-times mt-2 btnI"></i></span>\
+                                                        <span class="mt-2 btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct"><i class="fas fa-plus mt-2 btnI"></i></span>\
+                                                    </td>\
+            </tr>');
+            count++;
+            console.log("row added, count:"+count);
+            //initialise select 2
+            $('.select2').select2();
+            
+            //Initialize Select2 Elements
+            $('.select2bs4').select2({
+                theme: 'bootstrap4' 
+            });
             //remove red cross and add green plus to the last row of tbody
             $('#Purchase_tbody tr:last td:last .AddMoreProduct').css('display','inline-block');
-            TotalCalculate();
+            // $('#Purchase_tbody tr:last td:last .DelProduct').css('display','none');
+            $(this).css('display','none');
+            $(this).parent().children('.DelProduct').css('display','inline-block');
+        }); 
+
+        function TotalCalculate()
+        {
+                //calculating total of sub total
+                var TotalAmount = 0;
+                    $('.PurchaseSubTotal').each( function () { 
+                        if(isNaN($(this).val()) || $(this).val()=='')
+                        {
+                            var pst=0;
+                            // alert("purchase subtotal is NAN");
+                        }
+                        else{
+                            pst = $(this).val();
+                        }
+                        TotalAmount = parseFloat(TotalAmount) + parseFloat(pst);
+                    });
+                    $('#TotalSubTotal').val("");
+                    $('#TotalSubTotal').val(isNaN(TotalAmount.toFixed(2)) ? 0 : TotalAmount.toFixed(2));//add total value in tfoot
+
+                    $('#TotalAmount').val("");
+                    $('#TotalAmount').val(isNaN(TotalAmount.toFixed(2)) ? 0 : TotalAmount.toFixed(2));///add total value in Grand_total
+
+                    //calculating total tax amount
+                var TotalTaxAmount = 0;
+                    $('.PurchaseTaxAmount').each( function () { 
+                        if(isNaN($(this).val()) || $(this).val()=='')
+                        {
+                            var pta=0;
+                            // alert("purchase subtotal is NAN");
+                        }
+                        else{
+                            pta = $(this).val();
+                        }
+                        TotalTaxAmount = parseFloat(TotalTaxAmount) + parseFloat(pta);
+                    });
+                    $('#TotalTaxAmount').val("");
+                    $('#TotalTaxAmount').val(isNaN(TotalTaxAmount.toFixed(2)) ? 0 : TotalTaxAmount.toFixed(2));//add total tax value in tfoot
+
+                    //calculate discount on change of subtotal
+                    var disper = $('#DiscountPer').val();
+                    var amountBeforeDis = $('#TotalSubTotal').val();
+                    disAmt = parseFloat((amountBeforeDis*disper)/100);
+                    $('#DiscountAmount').val(disAmt.toFixed(2));
+                    console.log("discount amount on change"+disAmt);
+
+                    // calculate final total value
+                    var dis = $('#DiscountAmount').val();
+                    if(dis<=0 || isNaN(dis))
+                    {
+                        dis = 0;
+                    }
+                    if(TotalAmount<=0 || isNaN(TotalAmount))
+                    {
+                        TotalAmount = 0;
+                    }
+                    if(TotalTaxAmount<=0 || isNaN(TotalTaxAmount))
+                    {
+                        TotalTaxAmount = 0;
+                    }
+                    var ta = parseFloat(TotalAmount) + parseFloat(TotalTaxAmount) - parseFloat(dis);
+                    $('#TotalAmount').val(isNaN(ta.toFixed(2)) ? 0 : ta.toFixed(2));//set final value of total amount with tax and discount 
         }
-    });
-
-    //add row on click on add more product
-    $(document).on('click','.AddMoreProduct',function(){
-        $('#Purchase_tbody').append('<tr>\
-                                                <td>\
-                                                    <input type="hidden" name="RowId[]" class="RowId" value="0">\
-                                                    <div class="form-group">\
-                                                        <select name="PurchaseProduct[]" class="form-control select2 select2bs4 select2-danger PurchaseProduct" data-dropdown-css-class="select2-danger" style="width: 100%;" required>\
-                                                            <option value=\
-                                                            "">open to select product</option>\
-                                                            @foreach ($showProduct as $Product_Item)\
-                                                                <option value="{{ $Product_Item->id }}" data-id="{{ $Product_Item->id }}" data-TaxSlab="{{$Product_Item->TaxSlab}}">{{ $Product_Item->Name }}</option>\
-                                                            @endforeach\
-                                                        </select>\
-                                                    </div>\
-                                                </td>\
-                                                <td style="width: 120px">\
-                                                    <input type="number" min="1" class="form-control PurchaseQuantity" name="PurchaseQuantity[]" required>\
-                                                </td>\
-                                                <td style="width: 120px">\
-                                                    <input type="number" min="0.01" step="0.01" class="form-control PurchasePrice" name="PurchasePrice[]" required>\
-                                                </td>\
-                                                <td style="width: 120px">\
-                                                    <input type="number" class="form-control PurchaseTaxSlab" name="PurchaseTaxSlab[]" readonly>\
-                                                </td>\
-                                                <td style="width: 120px">\
-                                                    <input type="number" class="form-control PurchaseTaxAmount" name="PurchaseTaxAmount[]" readonly>\
-                                                </td>\
-                                                <td style="width: 200px">\
-                                                    <input type="text" class="form-control PurchaseSubTotal" name="PurchaseSubTotal[]" readonly>\
-                                                </td>\
-                                                <td style="width: 100px;text-align:center">\
-                                                    <span class="mt-2 btn btn-sm btn-danger rounded-3 btnSpan DelProduct"><i class="fas fa-times mt-2 btnI"></i></span>\
-                                                    <span class="mt-2 btn btn-sm btn-success rounded-3 btnSpan AddMoreProduct"><i class="fas fa-plus mt-2 btnI"></i></span>\
-                                                </td>\
-        </tr>');
-        //initialise select 2
-        $('.select2').select2();
         
-        //Initialize Select2 Elements
-        $('.select2bs4').select2({
-            theme: 'bootstrap4' 
+        //calculate subtotal on entering price
+        $(document).on('input','.PurchasePrice',function(){
+                var row = $(this).closest('tr');
+                var price = row.find('.PurchasePrice').val();
+                var qty = row.find('.PurchaseQuantity').val();
+                
+                var subTotal = qty * parseFloat(price);
+                    console.log(qty + '\t' + price + '\t' + subTotal);
+                    row.find(".PurchaseSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
+                    
+                    //calculating tax amount
+                    var taxslab = row.find('.PurchaseTaxSlab').val();
+                    taxAmt = parseFloat((taxslab*price*qty)/100);
+                    row.find('.PurchaseTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
+                    console.log(taxAmt);
+                    TotalCalculate();
         });
-        //remove red cross and add green plus to the last row of tbody
-        $('#Purchase_tbody tr:last td:last .AddMoreProduct').css('display','inline-block');
-        // $('#Purchase_tbody tr:last td:last .DelProduct').css('display','none');
-        $(this).css('display','none');
-        $(this).parent().children('.DelProduct').css('display','inline-block');
-    }); 
 
-    function TotalCalculate()
-    {
-               //calculating total of sub total
-               var TotalAmount = 0;
-                $('.PurchaseSubTotal').each( function () { 
-                    if(isNaN($(this).val()) || $(this).val()=='')
-                    {
-                        var pst=0;
-                        // alert("purchase subtotal is NAN");
-                    }
-                    else{
-                        pst = $(this).val();
-                    }
-                    TotalAmount = parseFloat(TotalAmount) + parseFloat(pst);
-                });
-                $('#TotalSubTotal').val("");
-                $('#TotalSubTotal').val(isNaN(TotalAmount.toFixed(2)) ? 0 : TotalAmount.toFixed(2));//add total value in tfoot
-
-                $('#TotalAmount').val("");
-                $('#TotalAmount').val(isNaN(TotalAmount.toFixed(2)) ? 0 : TotalAmount.toFixed(2));///add total value in Grand_total
-
-                //calculating total tax amount
-               var TotalTaxAmount = 0;
-                $('.PurchaseTaxAmount').each( function () { 
-                    if(isNaN($(this).val()) || $(this).val()=='')
-                    {
-                        var pta=0;
-                        // alert("purchase subtotal is NAN");
-                    }
-                    else{
-                        pta = $(this).val();
-                    }
-                    TotalTaxAmount = parseFloat(TotalTaxAmount) + parseFloat(pta);
-                });
-                $('#TotalTaxAmount').val("");
-                $('#TotalTaxAmount').val(isNaN(TotalTaxAmount.toFixed(2)) ? 0 : TotalTaxAmount.toFixed(2));//add total tax value in tfoot
-
-                //calculate discount on change of subtotal
-                var disper = $('#DiscountPer').val();
-                var amountBeforeDis = $('#TotalSubTotal').val();
-                disAmt = parseFloat((amountBeforeDis*disper)/100);
-                $('#DiscountAmount').val(disAmt.toFixed(2));
-                console.log("discount amount on change"+disAmt);
-
-                // calculate final total value
-                var dis = $('#DiscountAmount').val();
-                if(dis<=0 || isNaN(dis))
-                {
-                    dis = 0;
-                }
-                if(TotalAmount<=0 || isNaN(TotalAmount))
-                {
-                    TotalAmount = 0;
-                }
-                if(TotalTaxAmount<=0 || isNaN(TotalTaxAmount))
-                {
-                    TotalTaxAmount = 0;
-                }
-                var ta = parseFloat(TotalAmount) + parseFloat(TotalTaxAmount) - parseFloat(dis);
-                $('#TotalAmount').val(isNaN(ta.toFixed(2)) ? 0 : ta.toFixed(2));//set final value of total amount with tax and discount 
-    }
-    
-    //calculate subtotal on entering price
-    $(document).on('input','.PurchasePrice',function(){
-               var row = $(this).closest('tr');
-               var price = row.find('.PurchasePrice').val();
-               var qty = row.find('.PurchaseQuantity').val();
-               
-               var subTotal = qty * parseFloat(price);
-                console.log(qty + '\t' + price + '\t' + subTotal);
-                row.find(".PurchaseSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
+        //calculate subtotal on entering quantity
+        $(document).on('input','.PurchaseQuantity',function(){
+                var row = $(this).closest('tr');
+                var price = row.find('.PurchasePrice').val();
+                var qty = row.find('.PurchaseQuantity').val();
                 
-                //calculating tax amount
-                var taxslab = row.find('.PurchaseTaxSlab').val();
-                taxAmt = parseFloat((taxslab*price*qty)/100);
-                row.find('.PurchaseTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
-                console.log(taxAmt);
-                TotalCalculate();
-    });
+                var subTotal = qty * parseFloat(price);
+                    console.log(qty + '\t' + price + '\t' + subTotal);
+                    row.find(".PurchaseSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
+                    
+                    //calculating tax amount
+                    var taxslab = row.find('.PurchaseTaxSlab').val();
+                    taxAmt = parseFloat((taxslab*price*qty)/100);
+                    row.find('.PurchaseTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
+                    console.log(taxAmt);
+                    TotalCalculate();
+        });
 
-    //calculate subtotal on entering quantity
-    $(document).on('input','.PurchaseQuantity',function(){
-               var row = $(this).closest('tr');
-               var price = row.find('.PurchasePrice').val();
-               var qty = row.find('.PurchaseQuantity').val();
-               
-               var subTotal = qty * parseFloat(price);
-                console.log(qty + '\t' + price + '\t' + subTotal);
-                row.find(".PurchaseSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
-                
-                //calculating tax amount
-                var taxslab = row.find('.PurchaseTaxSlab').val();
-                taxAmt = parseFloat((taxslab*price*qty)/100);
-                row.find('.PurchaseTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
-                console.log(taxAmt);
-                TotalCalculate();
-    });
-
-    //calculating discount percentage
-   $('#DiscountPer').on('input',function(){
-                var discountpercentage = $('#DiscountPer').val();
-                var amountBeforeDis = $('#TotalSubTotal').val();
-                disAmt = parseFloat((amountBeforeDis*discountpercentage)/100);
-                $('#DiscountAmount').val(disAmt.toFixed(2));
-                console.log(disAmt);
-                TotalCalculate();
-    });
+        //calculating discount percentage
+        $('#DiscountPer').on('input',function(){
+                        var discountpercentage = $('#DiscountPer').val();
+                        var amountBeforeDis = $('#TotalSubTotal').val();
+                        disAmt = parseFloat((amountBeforeDis*discountpercentage)/100);
+                        $('#DiscountAmount').val(disAmt.toFixed(2));
+                        console.log(disAmt);
+                        TotalCalculate();
+        });
 
     </script>
 @endsection

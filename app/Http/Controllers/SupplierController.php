@@ -152,7 +152,16 @@ class SupplierController extends Controller
             $sup = Supplier::find($id);
             // print_r($request->all());
             // return false;
-            $sup->update($request->all());
+            $sup->Supplier_Name = $request->Supplier_Name;
+            $sup->Brand_Name = $request->Brand_Name;
+            $sup->Address = $request->Address;
+            $sup->Contact = $request->Contact;
+            $sup->Email_Id = $request->Email_Id;
+            $sup->GST_No = $request->GST_No;
+            $sup->Account_No = $request->Account_No;
+            $sup->IFSC_Code = $request->IFSC_Code;
+            $sup->Active_Status = $request->Active_Status;
+            $sup->update();
             return response()->json([
                 'status'=>200,
                 'message'=>'Supplier Updated Successsfully',

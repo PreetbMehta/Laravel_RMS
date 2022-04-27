@@ -130,8 +130,10 @@ class CategoryController extends Controller
         else
         {
             $cat = category::find($id);
-
-            $okay = $cat->update($request->all());
+            $cat->id = $request->id;
+            $cat->Name = $request->Name;
+            $cat->Active_Status = $request->Active_Status;
+            $okay = $cat->update();
             if($okay){
                 // return redirect()->back()->with('status','Category updated successfully');
                 return response()->json([

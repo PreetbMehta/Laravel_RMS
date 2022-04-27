@@ -1,9 +1,6 @@
 @extends('layouts.admin')
 
 @section('content')
-    <!-- JQuery DataTables css-->
-    <link rel="stylesheet" href="//cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
-
     {{-- Session Message --}}
     @if (session('status'))
         <div class="alert alert-success alert-dismissible fade show">
@@ -142,26 +139,29 @@
                     </button>
                 </div>
             </div>
-            <div class="card-body">
-                <table id="Supplier-Table" class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Supplier_id</th>
-                            <th>Supplier Name</th>
-                            <th>Brand Name</th>
-                            <th>Address</th>
-                            <th>Contact no.</th>
-                            <th>Email id</th>
-                            <th>GST no.</th>
-                            <th>Account no.</th>
-                            <th>IFSC code</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="Sup_Tab_Body">
-
-                    </tbody>
-                </table>
+            <div class="card-body ">
+                <div class="table-responsive">
+                    <table id="Supplier-Table" class="table table-striped table-bordered wrap">
+                        <thead>
+                            <tr>
+                                <th>Supplier id</th>
+                                <th>Supplier Name</th>
+                                <th>Brand Name</th>
+                                <th>Address</th>
+                                <th>Contact no.</th>
+                                <th>Email id</th>
+                                <th>GST no.</th>
+                                <th>Account no.</th>
+                                <th>IFSC code</th>
+                                <th>Active Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="Sup_Tab_Body">
+    
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -242,6 +242,15 @@
                                     required>
                             </div>
                         </div>
+                        <div class="row">
+                            <label for="">10)Active Status:</label>
+                            <div class="form-group radio">
+                                <input type="radio" name="Active_Status" class="ml-3" id="Active" value="1">
+                                <label for="Active">Active</label>
+                                <input type="radio" name="Active_Status" class="ml-3" id="InActive" value="0">
+                                <label for="InActive">InActive</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -253,9 +262,6 @@
         </div>
     </div>
     {{-- Scripts-------------------------------------------------------------------------- --}}
-
-    <!-- JQuery DataTable JS-->
-    <script src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
 
     <!--JQUERY DATATABLE SCRIPT-->
     <script>
@@ -272,6 +278,52 @@
             });
             //ajax fetch data>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             var table = $('#Supplier-Table').DataTable({
+                dom: "<'row'<'col-sm-12 col-md-4' B><'col-sm-12 col-md-4 text-center'l><'col-sm-12 col-md-4'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+
+                    buttons: [
+
+                        {
+                            extend: 'print',
+                            orientation: 'landscape',
+                            pageSize: 'A4',
+                            exportOptions: {
+                                columns: ':visible'
+                            },
+                            customize: function (win) {
+                                $(win.document.body).css('font-size', '9pt').css('color', '#000000');
+                                $(win.document.body).css('background', '#FFFFFF');
+                                $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
+                            },
+                            text : "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-printer' viewBox='0 0 16 16'><path d='M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z'/><path d='M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z'/></svg> Print"
+                        },
+
+                        {
+                            extend: 'pdfHtml5',
+                            orientation: 'landscape',
+                            pageSize: 'LEGAL',
+                            exportOptions: {
+                                columns: ':visible'
+                            },
+                            
+                        },
+                        {
+                            extend: 'excel',
+                            exportOptions: {
+                                columns: ':visible'
+                            },
+                            text : "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-file-spreadsheet' viewBox='0 0 16 16'><path d='M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v4h10V2a1 1 0 0 0-1-1H4zm9 6h-3v2h3V7zm0 3h-3v2h3v-2zm0 3h-3v2h2a1 1 0 0 0 1-1v-1zm-4 2v-2H6v2h3zm-4 0v-2H3v1a1 1 0 0 0 1 1h1zm-2-3h2v-2H3v2zm0-3h2V7H3v2zm3-2v2h3V7H6zm3 3H6v2h3v-2z'/></svg> Excel"
+                        },
+                        {
+                            extend: 'colvis',
+                            exportOptions: {
+                                columns: ':visible'
+                            },
+                            text : "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-list' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z'/></svg> Column Visible"
+                        }
+                    ],
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('suppliers.index') }}",
@@ -312,6 +364,10 @@
                     {
                         data: 'IFSC_Code',
                         name: 'IFSC_Code'
+                    },
+                    {
+                        data: 'Active_Status',
+                        name: 'Active_Status'
                     },
                     {
                         data: 'action',
@@ -382,7 +438,8 @@
                     'Email_Id': $('#Edit_Email_Id').val(),
                     'GST_No': $('#Edit_GST_No').val(),
                     'Account_No': $('#Edit_Account_No').val(),
-                    'IFSC_Code': $('#Edit_IFSC_Code').val()
+                    'IFSC_Code': $('#Edit_IFSC_Code').val(),
+                    'Active_Status': $('input[name="Active_Status"]:checked').val()
                 }
                 $.ajax({
                     type: "PUT",
@@ -486,6 +543,15 @@
             var IFSC = $(this).parent().parent().children().eq(8).text();
             $('#Edit_IFSC_Code').val(IFSC); //getting supplier ifsc
             // console.log(IFSC);
+
+            var status = $(this).parent().parent().children().eq(9).text();
+            console.log("Status:"+status);
+            if(status == '1'){
+                $('#Active').attr('checked','checked');
+            }
+            else{
+                $('#InActive').attr('checked','checked');
+            }
         });
         });
     </script>

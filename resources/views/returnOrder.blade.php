@@ -79,9 +79,9 @@
                             </div>
                         </div>
                         <div class="card mt-2 p-0">
-                            <div class="card-body p-3">
+                            <div class="card-body p-3 table-responsive">
                                 <!-- table for adding ordered products -->
-                                <table class="table table-bordered table-striped m-1" id="OrderReturn_Table">
+                                <table class="table table-bordered table-striped m-1 dtr-inline" id="OrderReturn_Table">
                                     <thead>
                                         <tr>
                                             <th>Product <span style="color: red">*</span></th>
@@ -106,7 +106,8 @@
                                                 </td>
                                                 <td style="width: 120px">
                                                     <input type="number" min="1" class="form-control SalesQuantity"
-                                                    name="SalesQuantity[]" value="{{$item->Sales_Quantity}}" required>
+                                                    name="SalesQuantity[]" value="{{$item->Sales_Quantity}}" min="1" max="{{$item->Sales_Quantity}}" required>
+                                                    <input type="hidden" id="hiddenQuantity" value="{{$item->Sales_Quantity}}">
                                                 </td>
                                                 <td style="width: 120px">
                                                     <input type="number" min="0.01" step="0.01" class="form-control SalesPrice" name="SalesPrice[]" value="{{$item->Sales_Price}}" required>
@@ -175,7 +176,9 @@
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-header">
-                        <h3 style="display: flex">Total <div id="Total" class="ml-2">{{ceil($sales_overview[0]->Total_Amount)}}</div>
+                        <h3 style="display: flex">Total 
+                            <div id="Total" class="ml-2">{{ceil($sales_overview[0]->Total_Amount)}}</div>
+                            <input type="hidden" name="Total" value="{{ceil($sales_overview[0]->Total_Amount)}}">
                         </h3>
                     </div>
                     <div class="card-body">
@@ -228,6 +231,10 @@
                                 <input type="radio" value="Credit_Return" name="Return_Payment_Radio" class="Return_Payment_Radio ml-4 mt-2" id="CreditReturn_Radio" required>
                                 <label for="CreditReturn_Radio">Credit Return</label>
                             </div>
+                        </div>
+                        <div class="Notes">
+                            <label for="Notes">Note:</label>
+                            <textarea name="Notes" id="Notes" class="form-control" rows="5"></textarea>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -345,18 +352,29 @@
             $(document).on('input', '.SalesQuantity', function() {
                 var row = $(this).closest('tr');
                 var price = row.find('.SalesPrice').val();
-                var qty = row.find('.SalesQuantity').val();
+                var qty = parseInt(row.find('.SalesQuantity').val());
+                var maxqty = parseInt(row.find('.SalesQuantity').attr('max'));
 
-                var subTotal = qty * parseFloat(price);
-                console.log(qty + '\t' + price + '\t' + subTotal);
-                row.find(".SalesSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
+                if(qty>maxqty)
+                {
+                    swal("Alert!","You have buyed only "+maxqty+" units of this so you can return that much only, Not more than that!","warning")
+                    var oldQty = $('#hiddenQuantity').val();
+                    row.find('.SalesQuantity').val(oldQty);
+                }
+                else
+                {
+                    var subTotal = qty * parseFloat(price);
+                    console.log(qty + '\t' + price + '\t' + subTotal);
+                    row.find(".SalesSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
+    
+                    //calculating tax amount
+                    var taxslab = row.find('.SalesTaxSlab').val();
+                    taxAmt = parseFloat((taxslab * price * qty) / 100);
+                    row.find('.SalesTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
+                    // console.log(taxAmt);
+                    TotalCalculate();
+                }
 
-                //calculating tax amount
-                var taxslab = row.find('.SalesTaxSlab').val();
-                taxAmt = parseFloat((taxslab * price * qty) / 100);
-                row.find('.SalesTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
-                // console.log(taxAmt);
-                TotalCalculate();
             });
         });
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Supplier;
 use App\Models\Product;
+use App\Models\Product_Tracker;
 use App\Models\Purchase_Detail;
 use App\Models\Purchase_Overview;
 use Illuminate\Http\Request;
@@ -25,8 +26,13 @@ class PurchaseController extends Controller
     public function index()
     {
         //
-        $show = Product::select('id','Name','TaxSlab')->orderBy('Name','asc')->get();
-        $show_supp = Supplier::select('id','Supplier_Name','Brand_Name')->get();
+        $show = Product::select('id','Name','TaxSlab','Reference_Id')
+                    ->where('Active_Status','=','1')
+                    ->orderBy('Name','asc')
+                    ->get();
+        $show_supp = Supplier::select('id','Supplier_Name','Brand_Name')
+                    ->where('Active_Status','=','1')
+                    ->get();
         return view('addPurchase',['showProduct'=>$show,'Show_supp'=>$show_supp]);
     }
 
@@ -113,6 +119,15 @@ class PurchaseController extends Controller
                     $purchase_detail->Tax_Amount = $request->PurchaseTaxAmount[$i];
                     $purchase_detail->Sub_Total = $request->PurchaseSubTotal[$i];
                     $purchase_detail->save();
+
+                    //enter details in product tracker table
+                    $proTrack = new Product_Tracker;
+                    $proTrack->Date = $request->input('Date_Of_Purchase');
+                    $proTrack->Product_Id = $request->PurchaseProductId[$i];
+                    $proTrack->Quantity = $request->PurchaseQuantity[$i];
+                    $proTrack->Type = '1';
+                    $proTrack->Purchase_Id = $insert_id;
+                    $proTrack->save();
                 }
                 return redirect()->back()->with("status","Purchase Added Successfully");
             }

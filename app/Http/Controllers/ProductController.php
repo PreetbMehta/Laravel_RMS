@@ -25,8 +25,8 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         //
-        $Cat_Select = category::all(); //for fetching category names
-        $taxSlab = taxSlab::all();
+        $Cat_Select = category::all()->where('Active_Status','=','1'); //for fetching category names
+        $taxSlab = taxSlab::all()->where('Active_Status','=','1');
         if ($request->ajax()) {
             $data = Product::orderBy("id", "desc")->get();
             return Datatables::of($data)
@@ -35,25 +35,17 @@ class ProductController extends Controller
                     $url = asset('Uploads/Product_Pics/' . $row->Picture);
                     return '<img src="' . $url . '" border="0" width="100" class="img-rounded" align="center" />';
                 })
-                ->addColumn('Alert_Quantity',function($row){
-                    $val="";
-                    if($row->Quantity<=$row->Alert_Quantity)
-                    {
-                        $val='<span class="badge badge-danger">'.$row->Alert_Quantity.'</span>';
-                    }
-                    else
-                    {
-                        $val =$row->Alert_Quantity;
-                    }
-                    return $val;
-                })
+                // ->addColumn('Alert_Quantity',function($row){
+                //     $val =$row->Alert_Quantity;
+                //     return $val;
+                // })
                 ->addColumn('action', function ($row) {
                     $btn = '<button id="edit_Btn" data-toggle="modal" data-target="#EditProductModal" value="' . $row->id . '" class="edit btn btn-primary btn-sm editBtn"><i class="fas fa-pen text-white"></i> Edit</button>';
-                    $btn = $btn . ' <button id="del_Btn" data-toggle="tooltip" value="' . $row->id . '" data-original-title="Delete" class="btn btn-danger btn-sm deleteBtn"><i class="far fa-trash-alt text-white" data-feather="delete"></i> Delete</button>';
+                    $btn = $btn . ' <button id="del_Btn" value="' . $row->id . '"class="btn btn-danger btn-sm deleteBtn"><i class="fas fa-trash text-white" data-feather="delete"></i> Delete</button>';
 
                     return $btn;
                 })
-                ->rawColumns(['Picture','Alert_Quantity', 'action'])->make(true);
+                ->rawColumns(['Picture', 'action'])->make(true);
         }
 
         return response()->view('products', compact('Cat_Select', 'taxSlab'));
@@ -85,7 +77,7 @@ class ProductController extends Controller
             'MRP' => 'required|numeric',
             'Unit' => 'required',
             'TaxSlab' => 'required',
-            'Quantity' => 'required|numeric',
+            // 'Quantity' => 'required|numeric',
         ]);
         if ($validate->fails()) {
             return response()->json([
@@ -98,7 +90,7 @@ class ProductController extends Controller
 
             $product->Reference_Id = $request->input('Reference_Id');
             $product->Category = $request->input('Category');
-            $product->Quantity = $request->input('Quantity');
+            // $product->Quantity = $request->input('Quantity');
             $product->Alert_Quantity = $request->input('Alert_Quantity');
             $product->Name = $request->input('Name');
             $product->MRP = $request->input('MRP');
@@ -163,7 +155,7 @@ class ProductController extends Controller
             'MRP' => 'required|numeric',
             'Unit' => 'required',
             'TaxSlab' => 'required',
-            'Quantity' => 'required|numeric',
+            // 'Quantity' => 'required|numeric',
         ]);
         // $Editvalidate = $request->validate([
         //     'Name'=>'required',
@@ -183,7 +175,7 @@ class ProductController extends Controller
             $pro = Product::find($id);
 
             $pro->Category = $request->input('Category');
-            $pro->Quantity = $request->input('Quantity');
+            // $pro->Quantity = $request->input('Quantity');
             $pro->Alert_Quantity = $request->input('Alert_Quantity');
             $pro->Name = $request->input('Name');
             $pro->MRP = $request->input('MRP');
@@ -191,6 +183,7 @@ class ProductController extends Controller
             $pro->TaxSlab = $request->input('TaxSlab');
             $pro->Reference_Id = $request->input('Reference_Id');
             $pro->Short_Desc = $request->input('Short_Desc');
+            $pro->Active_Status = $request->input('Active_Status');
 
             if ($request->hasFile('Picture')) {
                 $destination = 'Uploads/Product_Pics/' . $pro->Picture;

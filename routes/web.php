@@ -13,6 +13,9 @@ use App\Http\Controllers\TaxSlabController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\CreditsController;
 use App\Http\Controllers\ReturnOrderController;
+use App\Http\Controllers\PaybackController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\InvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,8 +28,8 @@ use App\Http\Controllers\ReturnOrderController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('/',[App\Http\Controllers\HomeController::class, 'index'], function () {
+    return view('home');
 });
 
 Auth::routes();
@@ -61,7 +64,7 @@ Route::resource('sales',SalesController::class);
 Route::post('addNewCustomer',[App\Http\Controllers\SalesController::class,'addNewCust']);
 
 //route for view sales
-Route::get('/ViewSales',[App\Http\Controllers\SalesController::class,'view']);
+Route::get('/ViewSales',[App\Http\Controllers\SalesController::class,'view'])->name('viewSales');
 
 //route for viewSalesDetails
 Route::get('/viewSales/{id}',[App\Http\Controllers\SalesController::class,'viewSalesDetails']);
@@ -72,7 +75,7 @@ Route::delete('/DeleteSalesDetails/{id}',[App\Http\Controllers\SalesController::
 // Route::get('ViewPurchaseDetails-fetch',[App\Http\Controllers\ViewPurchaseDetailsController::class,'fetch_data'])->name('fetViwPurDet');
 
 //credits Routes--------------------------------------------------------------------------------
-Route::get('/credits',[App\Http\Controllers\CreditsController::class,'index']);
+Route::get('/credits',[App\Http\Controllers\CreditsController::class,'index'])->name('credits.index');
 
 Route::post('/acceptPayment',[App\Http\Controllers\CreditsController::class,'acceptPayment']);
 
@@ -85,3 +88,26 @@ Route::resource('returnOrder',ReturnOrderController::class);
 
 Route::get('viewReturnOrder/{id}',[App\Http\Controllers\ReturnOrderController::class,'viewReturnOrder']);
 
+// reports routes
+Route::get('/salesReport',[App\Http\Controllers\ReportsController::class,'SalesReportindex'])->name('salesReport.index');
+
+Route::get('/purchaseReport',[App\Http\Controllers\ReportsController::class,'PurchaseReportindex'])->name('purchaseReport.index');
+
+Route::get('/ReturnOrdersReport',[App\Http\Controllers\ReportsController::class,'ReturnOrdersReportindex'])->name('ReturnOrdersReport.index');
+
+Route::get('/PaymentReport',[App\Http\Controllers\ReportsController::class,'PaymentReportindex'])->name('PaymentReport.index');
+
+Route::get('/PayBackReport',[App\Http\Controllers\ReportsController::class,'PayBackReportindex'])->name('PayBackReport.index');
+
+Route::get('/StockReport',[App\Http\Controllers\ReportsController::class,'StockReportindex'])->name('StockReport.index');
+
+//payback routes
+Route::Resource('/payback',PaybackController::class);
+
+//settings routes
+Route::view('/settings','settings')->name('settings.index');
+
+Route::post('/addSettings',[App\Http\Controllers\SettingsController::class,'addSettings'])->name('addSettings');
+
+//invoice route
+Route::get('/invoice/{id}',[App\Http\Controllers\InvoiceController::class,'index'])->name('invoice');

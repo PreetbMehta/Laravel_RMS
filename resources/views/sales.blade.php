@@ -67,7 +67,7 @@
                                 </label>
                                 <input type="date" name="Date_Of_Sale" id="Date_Of_Sale" class="form-control" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 mt-1">
                                 <label for="Customer_Id">
                                     <b>Customer Name:</b>
                                     <span style="color: red">*</span>
@@ -77,8 +77,13 @@
                                     class="form-control select2 select2bs4 select2-danger" required>
                                     <option value="">Open this select menu</option>
                                     @foreach ($cust as $show_cust)
-                                        <option value="{{ $show_cust->id }}" data-contact="{{ $show_cust->Contact }}">
-                                            {{ $show_cust->Customer_Name }}</option>
+                                        @if (session('customer'))
+                                            <option value="{{ $show_cust->id }}" data-contact="{{ $show_cust->Contact }}" {{($show_cust->id == Session('customer'))?'selected':''}}>{{ $show_cust->Customer_Name }}({{ $show_cust->Contact }})</option>
+
+                                            @else
+                                                    <option value="{{ $show_cust->id }}" data-contact="{{ $show_cust->Contact }}">
+                                                        {{ $show_cust->Customer_Name }}({{ $show_cust->Contact }})</option>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>
@@ -86,16 +91,16 @@
                                 <label for="Contact">
                                     <b>Contact No:</b>
                                 </label>
-                                <input type="text" name="Contact" id="Contact" class="form-control" required>
+                                <input type="text" name="Contact" id="Contact" class="form-control" readonly>
                             </div>
                         </div>
                         <div class="card m-2">
-                            <div class="card-body">
+                            <div class="card-body table-responsive p-1">
                                 <!-- table for adding ordered products -->
-                                <table class="table table-bordered table-striped m-1" id="Sales_Table">
+                                <table class="table table-bordered table-striped m-1 dtr-inline" id="Sales_Table">
                                     <thead>
                                         <tr>
-                                            <th>Product <span style="color: red">*</span></th>
+                                            <th style="width: 170px">Product <span style="color: red">*</span></th>
                                             <th style="width: 100px">Quantity <span style="color: red">*</span></th>
                                             <th style="width: 100px">MRP <span style="color: red">*</span></th>
                                             <th style="width: 100px">Tax Slab(%)</th>
@@ -116,30 +121,30 @@
                                                         @foreach ($pro as $Product_Item)
                                                             <option value="{{ $Product_Item->id }}"
                                                                 data-MRP="{{ $Product_Item->MRP }}"
-                                                                data-TaxSlab="{{ $Product_Item->TaxSlab }}">
-                                                                {{ $Product_Item->Name }}</option>
+                                                                data-TaxSlab="{{ $Product_Item->TaxSlab }}" data-QL="{{ $Product_Item->QuantityLeft }}">
+                                                                {{ $Product_Item->Name }}({{ $Product_Item->Reference_Id }})</option>
                                                         @endforeach
                                                     </select>
                                                 </div>
                                             </td>
                                             <td style="width: 120px">
-                                                <input type="number" min="1" class="form-control SalesQuantity"
+                                                <input type="number" min="1" class="form-control SalesQuantity p-1"
                                                     name="SalesQuantity[]" required>
                                             </td>
                                             <td style="width: 120px">
-                                                <input type="number" min="0.01" step="0.01" class="form-control SalesPrice"
+                                                <input type="number" min="0.01" step="0.01" class="form-control SalesPrice p-1"
                                                     name="SalesPrice[]" readonly>
                                             </td>
                                             <td style="width: 120px">
-                                                <input type="number" class="form-control SalesTaxSlab" name="SalesTaxSlab[]"
+                                                <input type="number" class="form-control SalesTaxSlab p-1" name="SalesTaxSlab[]"
                                                     readonly>
                                             </td>
                                             <td style="width: 120px">
-                                                <input type="number" class="form-control SalesTaxAmount"
+                                                <input type="number" class="form-control SalesTaxAmount p-1"
                                                     name="SalesTaxAmount[]" readonly>
                                             </td>
                                             <td style="width: 200px">
-                                                <input type="text" class="form-control SalesSubTotal" name="SalesSubTotal[]"
+                                                <input type="text" class="form-control SalesSubTotal p-1" name="SalesSubTotal[]"
                                                     readonly>
                                             </td>
                                             <td style="width: 60px">
@@ -239,6 +244,10 @@
                             <input type="text" class="form-control" id="UPI_Details_TransactionId"
                                 name="UPI_Details_TransactionId">
                         </div>
+                        <div class="Notes">
+                            <label for="Notes">Notes:</label>
+                            <textarea id="Notes" name="Notes" class="form-control" rows="5"></textarea>
+                        </div>
                     </div>
                     <div class="card-footer">
                         <div class="float-right">
@@ -311,21 +320,26 @@
         var today = moment().format('YYYY-MM-DD');
         $('#Date_Of_Sale').val(today);
 
-        //adding contact info on selection of customer name
-        $('#Customer_Id').on('change', function() {
-            var contact = $('#Customer_Id :selected').data('contact');
-            // console.log(contact);
-            $('#Contact').val(contact);
-        });
+        //adding contact info on basis of customer pre selected
+        var contact = $('#Customer_Id :selected').data('contact');
+        // console.log(contact);
+        $('#Contact').val(contact);
 
         //setting customer on the basis of contact
-        $('Contact').on('input',function(){
-            var contact = $(this).val();
-            var c = $('#Customer_Id option["data-contact"]').val();
-            console.log(c);
-        })
+        // $('Contact').on('input',function(){
+        //     var contact = $(this).val();
+        //     var c = $('#Customer_Id option["data-contact"]').val();
+        //     console.log(c);
+        // })
 
         $(document).ready(function() {
+            // adding contact info on selection of customer name
+            $('#Customer_Id').on('change', function() {
+                var contact = $('#Customer_Id :selected').data('contact');
+                console.log(contact);console.log('1');
+                $('#Contact').val(contact);
+            });
+
             //initialise select 2
             $('.select2').select2();
 
@@ -416,7 +430,7 @@
                                                                     <option value=\
                                                                     "">open to select product</option>\
                                                                     @foreach ($pro as $Product_Item)\
-                                                                        <option value="{{ $Product_Item->id }}" data-MRP="{{ $Product_Item->MRP }}" data-TaxSlab="{{$Product_Item->TaxSlab}}">{{ $Product_Item->Name }}</option>\
+                                                                        <option value="{{ $Product_Item->id }}" data-MRP="{{ $Product_Item->MRP }}" data-TaxSlab="{{$Product_Item->TaxSlab}}" data-QL="{{ $Product_Item->QuantityLeft }}">{{ $Product_Item->Name }}</option>\
                                                                     @endforeach\
                                                                 </select>\
                                                             </div>\
@@ -482,8 +496,12 @@
                 // console.log("mrp"+mrp);
                 var taxslab = $(this).find(':selected').attr('data-TaxSlab');
                 // console.log(taxslab);
+                var Ql = $(this).find(':selected').attr('data-QL');
+                console.log('QL:::'+Ql);
+
                 row.find('.SalesPrice').val(mrp);
                 row.find('.SalesTaxSlab').val(taxslab);
+                row.find('.SalesQuantity').attr('max',Ql);
 
                 //calculate subtotal on entering price
                 var row = $(this).closest('tr');
@@ -504,19 +522,32 @@
             //calculate subtotal on entering quantity
             $(document).on('input', '.SalesQuantity', function() {
                 var row = $(this).closest('tr');
-                var price = row.find('.SalesPrice').val();
-                var qty = row.find('.SalesQuantity').val();
+                var maxval = parseInt(row.find('.SalesQuantity').attr('max'));
+                console.log("maxval"+maxval);
+                var qty = parseInt(row.find('.SalesQuantity').val());
+                console.log('SalesQuant:'+qty);
 
-                var subTotal = qty * parseFloat(price);
-                console.log(qty + '\t' + price + '\t' + subTotal);
-                row.find(".SalesSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
-
-                //calculating tax amount
-                var taxslab = row.find('.SalesTaxSlab').val();
-                taxAmt = parseFloat((taxslab * price * qty) / 100);
-                row.find('.SalesTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
-                // console.log(taxAmt);
-                TotalCalculate();
+                if(qty>maxval)
+                {
+                    swal('Alert!','Limited stock Available!\nOnly '+maxval+' unit of this stock is available Currently!!',"warning");
+                    row.find('.SalesQuantity').val('');
+                    return false;
+                }
+                else
+                {
+                    var price = row.find('.SalesPrice').val();
+    
+                    var subTotal = qty * parseFloat(price);
+                    console.log(qty + '\t' + price + '\t' + subTotal);
+                    row.find(".SalesSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
+    
+                    //calculating tax amount
+                    var taxslab = row.find('.SalesTaxSlab').val();
+                    taxAmt = parseFloat((taxslab * price * qty) / 100);
+                    row.find('.SalesTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
+                    // console.log(taxAmt);
+                    TotalCalculate();
+                }
             });
 
             //calculating discount percentage

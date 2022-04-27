@@ -9,6 +9,9 @@ use App\Models\Product;
 use App\Models\Sales_Overview;
 use App\Models\Sales_Details;
 use App\Models\Tracker_Table;
+use App\Models\Product_Tracker;
+use App\Models\Settings;
+use DB;
 
 use Illuminate\Http\Request;
 
@@ -27,8 +30,14 @@ class SalesController extends Controller
     public function index()
     {
         //
-        $cust = Customer::all();
-        $pro = Product::select('id','Name','TaxSlab','MRP')->get();
+        $cust = Customer::all()
+                        ->where('Active_Status','=','1');
+        $pro = Product::join('product_trackers','product_trackers.Product_Id','=','products.id')
+                        ->groupBy('products.id','Name','TaxSlab','MRP','Reference_Id')
+                        ->select('products.id','Name','TaxSlab','MRP','Reference_Id', DB::raw('SUM(product_trackers.Quantity) as QuantityLeft'))
+                        ->where('Active_Status','=','1')
+                        ->get();
+        // return ['cust'=>$cust,'pro'=>$pro];
         return view('sales',compact('cust','pro'));
     }
 
@@ -115,6 +124,15 @@ class SalesController extends Controller
             // $pro = Product::find($request->SalesProduct[$i]);
             // $pro->Quantity -= $request->SalesQuantity[$i];
             // $pro->update();
+
+            //inserting record in product_Trackers table
+            $pro_track = new Product_Tracker;
+            $pro_track->Date = $request->input('Date_Of_Sale');
+            $pro_track->Product_Id = $request->SalesProduct[$i];
+            $pro_track->Quantity = -$request->SalesQuantity[$i];
+            $pro_track->Type = '0';
+            $pro_track->Sales_Id = $insert_id;
+            $pro_track->save();
         }
         // print_r($sale_over->Payment_Method);
         
@@ -128,6 +146,8 @@ class SalesController extends Controller
             $tracker_table->Amount = $sale_over->Total_Amount;
             $tracker_table->Type = '0';
             $tracker_table->Payment_Method = $sale_over->Payment_Method;
+            $tracker_table->Status = '0';
+            $tracker_table->Note = $request->Notes;
             $tracker_table->save();
         }
         else if($sale_over->Payment_Method == 'Cash'||$sale_over->Payment_Method == 'Card'||$sale_over->Payment_Method == 'UPI')
@@ -140,6 +160,8 @@ class SalesController extends Controller
             $tracker_table->Amount = $sale_over->Total_Amount;
             $tracker_table->Type = '0';
             $tracker_table->Payment_Method = 'Bill Generate';
+            $tracker_table->Status = '0';
+            $tracker_table->Note = $request->Notes;
             $tracker_table->save();
 
             //inserting for type-1 entry on sales
@@ -150,11 +172,14 @@ class SalesController extends Controller
             $tracker_table->Amount = -$sale_over->Total_Amount;
             $tracker_table->Type = '1';
             $tracker_table->Payment_Method = $sale_over->Payment_Method;
+            $tracker_table->Status = '0';
+            $tracker_table->Note = $request->Notes;
             $tracker_table->save();
         }
-        if($sale_over && $sale_det && $tracker_table)
+
+        if($sale_over && $sale_det && $tracker_table && $pro_track)
         {
-            return redirect()->back()->with('status','Sale Added Successfully');
+            return redirect()->route('invoice',$sale_over->id)->with('status','Sale Added Successfully');
         }
     }
 
@@ -185,9 +210,13 @@ class SalesController extends Controller
                                     ->where('sales_details.Sales_Id',$id)
                                     ->get(['sales_details.*','products.Name']);
 
-        $cust = Customer::select('id','Customer_Name','Contact')->get();
+        $cust = Customer::select('id','Customer_Name','Contact')
+                        ->where('Active_Status','=','1')
+                        ->get();
 
-        $pro = Product::select('id','Name','MRP','TaxSlab')->get();
+        $pro = Product::select('id','Name','MRP','TaxSlab')
+                        ->where('Active_Status','=','1')
+                        ->get();
         // print_r($sales_overview .'\n-----------------------------'. $sales_detail);return false;
         return view('EditSales',compact('sales_overview','sales_detail','cust','pro'));
     }
@@ -221,7 +250,7 @@ class SalesController extends Controller
         $sale_over->UPI_WalletName = $request->UPI_Details_WalletName;
         $sale_over->UPI_TransactionId = $request->UPI_Details_TransactionId;
 
-        $sale_over->save();//store above data in sales_overviews table
+        $sale_over->update();//store above data in sales_overviews table
         $no_of_products = count($request->SalesProduct);//count the total no of products to run for loop as many times 
         $insert_id = $sale_over->id;//get the insert id of above data as foreign key in sale_detail table
 
@@ -238,6 +267,15 @@ class SalesController extends Controller
                 $sale_det->SalesTaxAmount = $request->SalesTaxAmount[$i];
                 $sale_det->SalesSubTotal = $request->SalesSubTotal[$i];
                 $sale_det->save();
+
+                //inserting record in product_Trackers table
+                $pro_track = new Product_Tracker;
+                $pro_track->Date = $request->input('Date_Of_Sale');
+                $pro_track->Product_Id = $request->SalesProduct[$i];
+                $pro_track->Quantity = -$request->SalesQuantity[$i];
+                $pro_track->Type = '0';
+                $pro_track->Sales_Id = $insert_id;
+                $pro_track->save();
             }
             else
             {
@@ -250,6 +288,11 @@ class SalesController extends Controller
                 $sale->SalesTaxAmount = $request->SalesTaxAmount[$i];
                 $sale->SalesSubTotal = $request->SalesSubTotal[$i];
                 $sale->update();
+
+                //adding record to product_trackers table
+                $pro_track = Product_Tracker::where('Sales_Id','=',$insert_id)
+                                            ->where('Product_Id','=',$request->OldProduct[$i])
+                                            ->update(['Date'=>$request->input('Date_Of_Sale'),'Product_Id'=>$request->SalesProduct[$i],'Quantity'=>-$request->SalesQuantity[$i] ]);
             }
 
             // $pro = Product::find($request->SalesProduct[$i]);
@@ -261,7 +304,7 @@ class SalesController extends Controller
         {
             $track = Tracker_Table::where('Sales_Id',$id)
                                 ->where('Type','0')
-                                ->update(['Payment_Method'=>$request->Payment_Radio,'Amount'=>$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
+                                ->update(['Date'=>$request->Date_Of_Sale,'Payment_Method'=>$request->Payment_Radio,'Amount'=>$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
 
             $tdel = Tracker_Table::where('Sales_Id',$id)
                                 ->where('Type','1')
@@ -273,23 +316,27 @@ class SalesController extends Controller
             {
                 $track1 = Tracker_Table::where('Sales_Id',$id)
                                 ->where('Type','0')
-                                ->update(['Payment_Method'=>'Bill Generate','Amount'=>$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
+                                ->update(['Date'=>$request->Date_Of_Sale,'Payment_Method'=>$request->Payment_Radio,'Amount'=>$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
 
                                 
-                $trackAdd = new Tracker_Table;
-                $trackAdd->Date = $request->Date_Of_Sale;
-                $trackAdd->Cust_Id = $request->Customer_Id;
-                $trackAdd->Sales_Id = $id;
-                $trackAdd->Amount = -$request->TotalAmount;
-                $trackAdd->Type = '1';
-                $trackAdd->Payment_Method = $request->Payment_Radio;
-                $trackAdd->save();
+                // $trackAdd = new Tracker_Table;
+                // $trackAdd->Date = $request->Date_Of_Sale;
+                // $trackAdd->Cust_Id = $request->Customer_Id;
+                // $trackAdd->Sales_Id = $id;
+                // $trackAdd->Amount = -$request->TotalAmount;
+                // $trackAdd->Type = '1';
+                // $trackAdd->Payment_Method = $request->Payment_Radio;
+                // $trackAdd->save();
             }
             else
             {
                 $track1 = Tracker_Table::where('Sales_Id',$id)
-                                    ->where('Type','1')
-                                    ->update(['Payment_Method'=>$request->Payment_Radio,'Amount'=>-$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
+                                ->where('Type','0')
+                                ->update(['Date'=>$request->Date_Of_Sale,'Payment_Method'=>"EditSale ".$request->Payment_Radio,'Amount'=>$request->TotalAmount,'Cust_Id'=>$request->Customer_Id]);
+
+                $track2 = Tracker_Table::where('Sales_Id',$id)
+                                ->where('Type','1')
+                                ->update(['Date'=>$request->Date_Of_Sale,'Payment_Method'=>"EditSale ".$request->Payment_Radio,'Cust_Id'=>$request->Customer_Id]);
             }
         }
         return redirect('ViewSales')->with('status','Sale Updated Successfully');
@@ -299,6 +346,12 @@ class SalesController extends Controller
     public function DeleteSalesDetails($id)
     {
         $sal_det = Sales_Details::find($id);
+        $sal_pro = $sal_det->Sales_Product;//get product id from sales_details table row
+        $sal_id = $sal_det->Sales_Id;//get sales id from sales_Details table
+
+        $protrack = Product_Tracker::where('Sales_Id','=',$sal_id)
+                                    ->where('Product_Id','=',$sal_pro)
+                                    ->delete();
         $sal_det->delete();
         if($sal_det)
         {
@@ -322,7 +375,9 @@ class SalesController extends Controller
         $salD = Sales_Details::where('sales_details.Sales_Id',$id)->delete();
         // echo($pur.'\n'.$purD);
 
-        if($salo && $salD)
+        $protra = Product_Tracker::where('product_trackers.Sales_Id',$id)->delete();
+
+        if($salo && $salD && $protra)
         {
             return redirect()->back()->with('status','Sale deleted successfully');
         }
@@ -342,7 +397,7 @@ class SalesController extends Controller
     
             if($cust_new)
             {
-                return redirect()->back()->with('status','New Customer Added Successfully');
+                return redirect()->back()->with(['status'=>'New Customer Added Successfully','customer'=>$cust_new->id]);
             }
     }
 }

@@ -43,47 +43,49 @@
                         <input type="text" name="Total_Credit" id="Total_Credit" class="form-control bg-danger" value="{{- $credit}}" readonly>
                     </div>
                 </div>
-                <table class="table table-striped">
-                    <thead>
-                        <th>#</th>
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Payment_Type</th>
-                        <th>Note</th>
-                    </thead>
-                    <tbody>
-                        @php
-                            $i=1
-                        @endphp
-                        @foreach ($state as $item)
-                            <tr>
-                                <td>{{$i}}</td>
-                                <td>{{$item->Date}}</td>
-                                <td>
-                                    @if ($item->Amount < 0)
-                                        <i class="bg-success p-2"> {{abs($item->Amount)}} </i>
-                                        @else
-                                            <i class="bg-danger p-2"> {{$item->Amount}} </i>
-                                    @endif
-                                </td>
-                                <td>{{$item->Payment_Method}}</td>
-                                <td>
-                                    @if ($item->Note == '')
-                                        Nothing To Show
-                                        @else {{$item->Note}} 
-                                            @if($item->Sales_Id)
-                                                (sales id: {{$item->Sales_Id}})
-                                            @endif
-                                            @if ($item->Return_Id)
-                                                (Return id: {{$item->Return_Id}})
-                                            @endif
-                                    @endif
-                                </td>
-                            </tr>
-                            @php $i++ @endphp
-                        @endforeach
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-striped dataTable dtr-inline">
+                        <thead>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Payment_Type</th>
+                            <th>Note</th>
+                        </thead>
+                        <tbody>
+                            @php
+                                $i=1
+                            @endphp
+                            @foreach ($state as $item)
+                                <tr>
+                                    <td>{{$i}}</td>
+                                    <td>{{$item->Date}}</td>
+                                    <td>
+                                        @if ($item->Amount < 0)
+                                            <i class="bg-success p-2"> {{abs($item->Amount)}} </i>
+                                            @else
+                                                <i class="bg-danger p-2"> {{$item->Amount}} </i>
+                                        @endif
+                                    </td>
+                                    <td>{{$item->Payment_Method}}</td>
+                                    <td>
+                                        @if ($item->Note == '')
+                                            Nothing To Show
+                                            @else {{$item->Note}} 
+                                                @if($item->Sales_Id)
+                                                    (sales id: {{$item->Sales_Id}})
+                                                @endif
+                                                @if ($item->Return_Id)
+                                                    (Return id: {{$item->Return_Id}})
+                                                @endif
+                                        @endif
+                                    </td>
+                                </tr>
+                                @php $i++ @endphp
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

@@ -134,7 +134,11 @@ class CustomerController extends Controller
         else
         {
             $cust = Customer::find($id);
-            $cust->update($request->all());
+            $cust->Customer_Name = $request->Customer_Name;
+            $cust->Contact = $request->Contact;
+            $cust->Email_Id = $request->Email_Id;
+            $cust->Active_Status = $request->Active_Status;
+            $cust->update();
             return response()->json([
                 'status'=>200,
                 'message'=>'Customer Updated Successsfully',

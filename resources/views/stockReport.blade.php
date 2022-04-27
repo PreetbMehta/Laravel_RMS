@@ -1,88 +1,48 @@
 @extends('layouts.admin')
 
 @section('content')
-    <style>
-        #ViewSalesTable th,
-        td {
-            text-align: center;
-            overflow: hidden;
-        }
 
+    <style>
+        #StockReport_Table td,th{
+            text-align: center;
+        }
     </style>
     <!-- Content Header (Page header) -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">View Sales</h1>
+                    <h1 class="m-0">Stock Report</h1>
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active"><a href="#">View Sales</a></li>
+                        <li class="breadcrumb-item active"><a href="#">Stock Report</a></li>
                     </ol>
                 </div><!-- /.col -->
             </div><!-- /.row -->
         </div><!-- /.container-fluid -->
     </div>
 
-    @if (Session('status'))
-        <script>
-            swal('Success!', "{{ Session('status') }}", 'success', {
-                button: 'OK'
-            });
-        </script>
-    @endif
     <div class="content">
         <div class="card">
-            <div class="card-body table-responsive">
-                <table class="table table-bordered table-striped dataTable dtr-inline" id="ViewSalesTable">
+            <div class="card-body">
+                <h3>Filter by Fields</h3>
+                <div class="row">
+                    {{-- <input type="number" name="Total_Products" min="1" step="1" id="Total_Products" class="form-control col-md-3 m-1" placeholder="No Of Products Greater than or equal to">
+                    <input type="number" name="Amount" min="1" step="1" id="Amount" class="form-control col-md-3 m-1" placeholder="Amount Greater than or equal to"> --}}
+                    <input type="text" name="Product_Id" id="Product_Id" class="form-control col-md-3 m-1" placeholder="Product id">
+                    <input type="text" name="Product_Name" id="Product_Name" class="form-control col-md-3 m-1" placeholder="Product Name">
+                    <input type="button" class="btn btn-primary form-control col-md-1 m-1" value="Refresh" id="refresh">
+                </div>
+                <table class="table table-bordered table-striped dataTable dtr-inline" id="StockReport_Table">
                     <thead>
                         <th>id</th>
-                        <th>Date of sale</th>
-                        <th>Customer Name</th>
-                        <th>Contact No</th>
-                        <th>Total Products</th>
-                        <th>TaxAmount</th>
-                        <th>Discount</th>
-                        <th>Total</th>
-                        <th>Payment Method</th>
-                        <th>Action</th>
+                        <th>Product Name</th>
+                        <th>Stock Left</th>
                     </thead>
                     <tbody>
-                        @foreach ($sale_overview as $so)
-                            <tr>
-                                <td>{{ $so->id }}</td>
-                                <td>{{ $so->Date_Of_Sale }}</td>
-                                <td>{{ $so->Customer_Name }}</td>
-                                <td>{{ $so->Contact }}</td>
-                                <td>{{ $so->Total_Products }}</td>
-                                <td>{{ $so->Total_Tax_Amount }}</td>
-                                <td>{{ $so->Discount_Amount }}</td>
-                                <td>{{ $so->Total_Amount }}</td>
-                                <td>{{ $so->Payment_Method }}</td>
-                                <td style="display: flex">
-                                    <a href="{{ url('viewSales/' . $so->id) }}" class="btn btn-primary m-2"
-                                        data-bs-toggle="tooltip" title="View">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ url('sales/' . $so->id . '/edit') }}" class="btn btn-primary m-2"
-                                        data-bs-toggle="tooltip" title="Edit">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </a>
-                                    <a href="{{ route('returnOrder.show', $so->id) }}" class="btn btn-primary m-2"
-                                        data-bs-toggle="tooltip" title="Return Order">
-                                        <i class="ion ion-loop"></i>
-                                    </a>
-                                    <form action="{{ url('sales/' . $so->id) }}" method="POST" onsubmit="return DelValidation()">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-l m-2" data-bs-toggle="tooltip"
-                                            title="Delete"><i class="fas fa-trash"></i></button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
+                        
                     </tbody>
                 </table>
             </div>
@@ -90,9 +50,13 @@
     </div>
 
     <script>
-        $(document).ready(function() {
-            $('#ViewSalesTable').DataTable({
-                dom: "<'row'<'col-sm-12 col-md-4' B><'col-sm-12 col-md-4 text-center'l><'col-sm-12 col-md-4'f>>" +
+        $(document).ready(function(){
+            load_data();
+            function load_data()
+            {
+                //fetch data with ajax
+                var table = $('#StockReport_Table').DataTable({
+                    dom: "<'row'<'col-sm-12 col-md-4' B><'col-sm-12 col-md-4 text-center'l><'col-sm-12 col-md-4'f>>" +
                     "<'row'<'col-sm-12'tr>>" +
                     "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
                     "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
@@ -138,21 +102,39 @@
                             text : "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-list' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z'/></svg> Column Visible"
                         }
                     ],
-                order: ['0', 'desc']
+                    processing: true,
+                    serverSide: true,
+                    ajax: {
+                        url:"{{ route('StockReport.index') }}",
+                    },
+                    columns : [
+                        {data:'Product_Id',name:'Product_Id'},
+                        {data:'Name',name:'Name'},
+                        {data: 'Stock_Left', name: 'Stock_Left'},
+                    ],
+                    // order: [ [0, 'desc'] ],
+                    // "responsive": true, 
+                    // "buttons": ["excel", "pdf", "print", "colvis"]
+                });
+                //filtering table values on search
+                $('#Product_Name').keyup(function(){
+                    var pro = $(this).val();
+                    // console.log(custFil);
+                    table.column(1).search(pro).draw();
+                });
+                $('#Product_Id').keyup(function(){
+                    var proid = $(this).val();
+                    // console.log(custFil);
+                    table.column(0).search(proid).draw();
+                });
+            }
+            $('#refresh').click(function(){
+                $('#Product_Name').val('');
+                $('#Product_Id').val('');
+                $('#StockReport_Table').DataTable().clear().destroy();
+                load_data();
             });
         });
-        
-        //validation function for delete functionality
-        function DelValidation()
-        {
-            var c = confirm("Are you sure you want to delete this Purchase?");
-            if(c)
-            {return true;}
-            else
-            {
-                alert("Purchase Not Deleted");
-                return false;
-            }
-        }
+            
     </script>
 @endsection

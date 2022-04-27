@@ -7,6 +7,7 @@ use App\Models\Supplier;
 use App\Models\Purchase_Overview;
 use App\Models\Purchase_Detail;
 use App\Models\Product;
+use App\Models\Product_Tracker;
 use DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -64,13 +65,16 @@ class EditPurchaseController extends Controller
     public function show($id)
     {
         //
-        $sup = Supplier::select('id','Supplier_Name','Brand_Name')->get();
+        $sup = Supplier::select('id','Supplier_Name','Brand_Name')
+                        ->where('Active_Status','=','1')
+                        ->get();
 
         $pur_over = Purchase_Overview::select('*')->where('id',$id)->first();
 
         $pur_det = Purchase_Detail::all()->where('Purchase_Id',$id);
 
-        $showProduct = Product::all();
+        $showProduct = Product::all()
+                                ->where('Active_Status','=','1');
         return view('EditPurchase',compact('sup','pur_over','pur_det','id','showProduct'));
     }
 
@@ -143,6 +147,15 @@ class EditPurchaseController extends Controller
                     $purchase_detail->Tax_Amount = $request->PurchaseTaxAmount[$i];
                     $purchase_detail->Sub_Total = $request->PurchaseSubTotal[$i];
                     $purchase_detail->save();
+
+                    //enter details in product tracker table
+                    $proTrack = new Product_Tracker;
+                    $proTrack->Date = $request->input('Date_Of_Purchase');
+                    $proTrack->Product_Id = $request->PurchaseProduct[$i];
+                    $proTrack->Quantity = $request->PurchaseQuantity[$i];
+                    $proTrack->Type = '1';
+                    $proTrack->Purchase_Id = $id;
+                    $proTrack->save();
                 }
                 else
                 {
@@ -166,6 +179,15 @@ class EditPurchaseController extends Controller
                     $purchase_detail->Tax_Amount = $request->PurchaseTaxAmount[$i];
                     $purchase_detail->Sub_Total = $request->PurchaseSubTotal[$i];
                     $purchase_detail->update();
+
+                    //enter details in product tracker table
+                    $proTrackEdit = Product_Tracker::where('Purchase_Id','=',$id)
+                    ->where('Product_Id','=',$request->OldProductId[$i])
+                    ->first();
+                    $proTrackEdit->Date = $request->input('Date_Of_Purchase');
+                    $proTrackEdit->Product_Id = $request->PurchaseProduct[$i];
+                    $proTrackEdit->Quantity = $request->PurchaseQuantity[$i];
+                    $proTrackEdit->update();
                 }
             }
             return redirect('viewPurchase')->with("status","Purchase Updated Successfully");
@@ -182,8 +204,14 @@ class EditPurchaseController extends Controller
     {
         //
         $pur_det = Purchase_Detail::find($id);
+        $pur_Id = $pur_det->Purchase_Id;
+        $pro_Id = $pur_det->Product_Id;
+        // dd($pur_Id,$pro_Id);
+        $pro_track = Product_Tracker::where('Product_Id','=',$pro_Id)
+                                ->where('Purchase_Id','=',$pur_Id)
+                                ->delete();
         $pur_det->delete();
-        if($pur_det)
+        if($pur_det && $pro_track)
         {
             return response()->json([
                 'status'=>'200',

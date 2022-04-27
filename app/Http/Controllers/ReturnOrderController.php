@@ -8,6 +8,7 @@ use App\Models\Sales_Details;
 use App\Models\ReturnOrder_Overview;
 use App\Models\ReturnOrder_Details;
 use App\Models\Tracker_Table;
+use App\Models\Product_Tracker;
 
 class ReturnOrderController extends Controller
 {
@@ -50,6 +51,10 @@ class ReturnOrderController extends Controller
     public function store(Request $request)
     {
         //
+        // $total = intval($request->Total);
+        // $total1 = intval($request->Return_Amount);
+        // echo $total."---".$total1;
+        // echo intval($total1 - $total);
         // return $request->all();
         $ro_overview = new ReturnOrder_Overview;
         $ro_overview->Date_Of_Return = $request->Date_Of_Return;
@@ -82,6 +87,15 @@ class ReturnOrderController extends Controller
             // $pro = Product::find($request->SalesProduct[$i]);
             // $pro->Quantity -= $request->SalesQuantity[$i];
             // $pro->update();
+
+            //enter details in product tracker table
+            $proTrack = new Product_Tracker;
+            $proTrack->Date = $request->Date_Of_Return;
+            $proTrack->Product_Id = $request->SalesProductId[$i];
+            $proTrack->Quantity = $request->SalesQuantity[$i];
+            $proTrack->Type = '1';
+            $proTrack->Return_Id = $insert_Id;
+            $proTrack->save();
         }
 
         if($ro_overview->Return_Method == 'Credit_Return')
@@ -92,34 +106,53 @@ class ReturnOrderController extends Controller
             $tt->Sales_Id = $ro_overview->Sales_Id;
             $tt->Return_Id = $insert_Id;
             $tt->Payment_Method = $ro_overview->Return_Method;
-            $tt->Amount = -$ro_overview->Amount_Returned;
+            $tt->Amount = -ceil($ro_overview->Amount_Returned);
             $tt->Type = '1';
-            $tt->Note = 'Credit Return Bill Closure';
+            if($request->Notes == '')
+            {
+                $tt->Note = 'Credit Return Bill Closure';
+            }
+            else
+            {
+                $tt->Note = $request->Notes;
+            }
+            $tt->Status = '1';
             $tt->save();
         }
         else if($ro_overview->Return_Method == 'Cash' || $ro_overview->Return_Method == 'Bank')
         {
-            $tt = new Tracker_Table;
-            $tt->Date = $ro_overview->Date_Of_Return;
-            $tt->Cust_Id = $ro_overview->Customer_Id;
-            $tt->Sales_Id = $ro_overview->Sales_Id;
-            $tt->Return_Id = $insert_Id;
-            $tt->Payment_Method = $ro_overview->Return_Method;
-            $tt->Amount = $ro_overview->Amount_Returned;
-            $tt->Type = '0';
-            $tt->Note = 'Return Bill Generate';
-            $tt->save();
+            if($request->Notes == '')
+            {
+                $Note = 'Return Bill Partial/Full';
+            }
+            else
+            {
+                $Note = $request->Notes;
+            }
+            $tt = Tracker_Table::where('Sales_Id',$request->Sales_Id)
+            ->where('Type','0')
+            ->update([
+                'Date' => $request->Date_Of_Return,
+                'Cust_Id' => $request->Customer_Id,
+                // $tt->Sales_Id = $ro_overview->Sales_Id;
+                'Return_Id' => $insert_Id,
+                'Payment_Method' => $request->Payment_Radio,
+                'Amount' => ceil($request->Total - $request->Return_Amount),
+                // 'Type' => '0',
+                // 'Status'=>'2',
+                'Note' => $Note
+            ]);
 
-            $tt1 = new Tracker_Table;
-            $tt1->Date = $ro_overview->Date_Of_Return;
-            $tt1->Cust_Id = $ro_overview->Customer_Id;
-            $tt1->Sales_Id = $ro_overview->Sales_Id;
-            $tt1->Return_Id = $insert_Id;
-            $tt1->Payment_Method = $ro_overview->Return_Method;
-            $tt1->Amount = -$ro_overview->Amount_Returned;
-            $tt1->Type = '1';
-            $tt1->Note = 'Return Bill Closure';
-            $tt1->save();
+            // $tt1 = new Tracker_Table;
+            // $tt1->Date = $ro_overview->Date_Of_Return;
+            // $tt1->Cust_Id = $ro_overview->Customer_Id;
+            // $tt1->Sales_Id = $ro_overview->Sales_Id;
+            // $tt1->Return_Id = $insert_Id;
+            // $tt1->Payment_Method = $ro_overview->Return_Method;
+            // $tt1->Amount = -$ro_overview->Amount_Returned;
+            // $tt1->Type = '1';
+            // $tt1->Note = 'Return Bill Closure';
+            // $tt1->save();
         }
 
         return redirect()->route('returnOrder.index')->with('status','Return order Generated Successfully');
@@ -193,11 +226,13 @@ class ReturnOrderController extends Controller
     public function destroy($id)
     {
         //
-        // return false;
         $ro_over = ReturnOrder_Overview::find($id)->delete();
         $ro_det = ReturnOrder_Details::where('Return_Id','=',$id)->delete();
         $tts = Tracker_Table::where('Return_Id','=',$id)->delete();
-
-        return redirect()->back()->with('status','Return Order Deleted Successfully');
+        $pts = Product_Tracker::where('Return_Id','=',$id)->delete();
+        if($ro_det && $ro_over && $tts && $pts)
+        {
+            return redirect()->back()->with('status','Return Order Deleted Successfully');
+        }
     }
 }

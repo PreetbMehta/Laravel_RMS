@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Purchase_Overview;
 use App\Models\Sales_Overview;
 use App\Models\Sales_Details;
+use App\Models\Product_Tracker;
 use DB;
 
 class HomeController extends Controller
@@ -37,14 +38,22 @@ class HomeController extends Controller
         $category = category::count();
         $purchase = Purchase_Overview::count();
         $sale = Sales_Overview::count();
-   
-        //tptp-------------------------
-        // $count = Sales_Details::groupBy('Sales_Product')->select('Sales_Product', DB::raw('count(*) as total'))->get();;
-        // return $count;
 
         //alert Quantity Table
-        $proAlert = Product::whereRaw("Alert_Quantity >= Quantity")
-                                ->get(['id','Name','Reference_Id','Quantity','Alert_Quantity']);
-        return view('home',['product'=>$product,'supplier'=>$supplier,'customer'=>$customer,'category'=>$category,'purchase'=>$purchase,'sale'=>$sale,'proAlert'=>$proAlert]);
+        $pro_track = Product_Tracker::join('products','products.id','product_trackers.Product_Id')
+        ->groupBy('Product_Id','Name','products.Reference_Id','products.Alert_Quantity')
+        ->selectRaw('sum(product_trackers.Quantity) as QuantityLeft,Product_Id,products.Name,products.Reference_Id,products.Alert_Quantity')
+        ->get();
+        // return $pro_track;
+        $check = [];
+        for($i=0;$i<count($pro_track);$i++)
+        {
+            if($pro_track[$i]->QuantityLeft <= $pro_track[$i]->Alert_Quantity)
+            {
+                $check[] = $pro_track[$i];
+            }
+        }
+        // return $check;
+        return view('home',['product'=>$product,'supplier'=>$supplier,'customer'=>$customer,'category'=>$category,'purchase'=>$purchase,'sale'=>$sale,'proAlert'=>$check]);
     }
 }

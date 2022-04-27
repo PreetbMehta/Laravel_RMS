@@ -54,98 +54,100 @@
                         <input type="text" name="Contact" id="Contact" class="form-control" value="{{$sales_overview[0]->Contact}}" readonly>
                     </div>
                 </div>
-
-                <!-- table for adding ordered products -->
-                <table class="table table-striped mt-4" id="Sales_Table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Product <span style="color: red">*</span></th>
-                            <th style="width: 100px">Quantity <span style="color: red">*</span></th>
-                            <th style="width: 100px">MRP <span style="color: red">*</span></th>
-                            <th style="width: 100px">Tax Slab(%)</th>
-                            <th style="width: 100px">Tax Amount</th>
-                            <th style="width: 100px">SubTotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for ($i=0; $i<$sales_overview[0]->Total_Products; $i++)    
+                <div class="table-responsive">
+                    <!-- table for adding ordered products -->
+                    <table class="table table-striped mt-4 dtr-inline" id="Sales_Table">
+                        <thead>
                             <tr>
-                                <td>{{$i+1}}</td>
-                                <td>{{$sales_detail[$i]->Name}}({{$sales_detail[$i]->Sales_Product}})</td>
-                                <td style="width: 120px">{{$sales_detail[$i]->Sales_Quantity}}</td>
-                                <td style="width: 120px">{{$sales_detail[$i]->Sales_Price}}</td>
-                                <td style="width: 120px">{{$sales_detail[$i]->SalesTaxSlab}}</td>
-                                <td style="width: 120px">{{$sales_detail[$i]->SalesTaxAmount}}</td>
-                                <td style="width: 200px">{{$sales_detail[$i]->SalesSubTotal}}</td>
+                                <th>#</th>
+                                <th>Product <span style="color: red">*</span></th>
+                                <th style="width: 100px">Quantity <span style="color: red">*</span></th>
+                                <th style="width: 100px">MRP <span style="color: red">*</span></th>
+                                <th style="width: 100px">Tax Slab(%)</th>
+                                <th style="width: 100px">Tax Amount</th>
+                                <th style="width: 100px">SubTotal</th>
                             </tr>
-                        @endfor
-                        <tr>
-                            <td colspan="5">
-                                <label style=" float: right;">Total SubTotal:</label>
-                            </td>
-                            <td colspan="2">{{$sales_overview[0]->Total_SubTotal}}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="5">
-                                <label style="float: right;">Total Tax Amount:</label>
-                            </td>
-                            <td colspan="2">{{$sales_overview[0]->Total_Tax_Amount}}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="5">
-                                <label style="float: right">Discount:</label>
-                            </td>
-                            <td colspan="2">
-                                <label>Discount Percentage:</label>
-                                <div style="display: inline-block">{{$sales_overview[0]->Discount_Per}}</div>
-                                <br>
-                                <label>Discount Amount:</label>
-                                <div style="display: inline-block">{{$sales_overview[0]->Discount_Amount}}</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="5">
-                                <label style="float: right;">Total Amount:</label>
-                            </td>
-                            <td colspan="2">{{$sales_overview[0]->Total_Amount}}</td>
-                        </tr>
-                        <tr>
-                            <td colspan="5">
-                                <div style="float: right">
-                                    <label>Payment Method:</label>
-                                    <div style="display: inline-block" id="Pay_meth">{{$sales_overview[0]->Payment_Method}}</div>
-                                </div>
-                            </td>
-                            <td colspan="2">
-                                <div class="Cash_Details" style="display: none">
-                                    <label>Amount Paid:</label>
-                                    <div style="display: inline-block">{{$sales_overview[0]->Amount_Paid}}</div>
+                        </thead>
+                        <tbody>
+                            @for ($i=0; $i<$sales_overview[0]->Total_Products; $i++)    
+                                <tr>
+                                    <td>{{$i+1}}</td>
+                                    <td>{{$sales_detail[$i]->Name}}({{$sales_detail[$i]->Sales_Product}})</td>
+                                    <td style="width: 120px">{{$sales_detail[$i]->Sales_Quantity}}</td>
+                                    <td style="width: 120px">{{$sales_detail[$i]->Sales_Price}}</td>
+                                    <td style="width: 120px">{{$sales_detail[$i]->SalesTaxSlab}}</td>
+                                    <td style="width: 120px">{{$sales_detail[$i]->SalesTaxAmount}}</td>
+                                    <td style="width: 200px">{{$sales_detail[$i]->SalesSubTotal}}</td>
+                                </tr>
+                            @endfor
+                            <tr>
+                                <td colspan="5">
+                                    <label style=" float: right;">Total SubTotal:</label>
+                                </td>
+                                <td colspan="2">{{$sales_overview[0]->Total_SubTotal}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">
+                                    <label style="float: right;">Total Tax Amount:</label>
+                                </td>
+                                <td colspan="2">{{$sales_overview[0]->Total_Tax_Amount}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">
+                                    <label style="float: right">Discount:</label>
+                                </td>
+                                <td colspan="2">
+                                    <label>Discount Percentage:</label>
+                                    <div style="display: inline-block">{{$sales_overview[0]->Discount_Per}}</div>
                                     <br>
-                                    <label>Returned Change:</label>
-                                    <div style="display: inline-block">{{$sales_overview[0]->Returning_Change}}</div>
-                                </div>
-                                <div class="Card_Details" style="display: none">
-                                    <label>Card Owner Name:</label>
-                                    <div style="display: inline-block">{{$sales_overview[0]->Card_OwnerName}}</div>
-                                    <br>
-                                    <label>Bank Name:</label>
-                                    <div style="display: inline-block">{{$sales_overview[0]->Card_BankName}}</div>
-                                    <br>
-                                    <label>Card Number:</label>
-                                    <div style="display: inline-block">{{$sales_overview[0]->Card_Number}}</div>
-                                </div>
-                                <div class="UPI_Details" style="display: none">
-                                    <label for="">UPI Wallet:</label>
-                                    <div style="display: inline-block">{{$sales_overview[0]->UPI_WalletName}}</div>
-                                    <br>
-                                    <label for="">UPI Transaction ID:</label>
-                                    <div style="display: inline-block">{{$sales_overview[0]->UPI_TransactionId}}</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                    <label>Discount Amount:</label>
+                                    <div style="display: inline-block">{{$sales_overview[0]->Discount_Amount}}</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">
+                                    <label style="float: right;">Total Amount:</label>
+                                </td>
+                                <td colspan="2">{{$sales_overview[0]->Total_Amount}}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">
+                                    <div style="float: right">
+                                        <label>Payment Method:</label>
+                                        <div style="display: inline-block" id="Pay_meth">{{$sales_overview[0]->Payment_Method}}</div>
+                                    </div>
+                                </td>
+                                <td colspan="2">
+                                    <div class="Cash_Details" style="display: none">
+                                        <label>Amount Paid:</label>
+                                        <div style="display: inline-block">{{$sales_overview[0]->Amount_Paid}}</div>
+                                        <br>
+                                        <label>Returned Change:</label>
+                                        <div style="display: inline-block">{{$sales_overview[0]->Returning_Change}}</div>
+                                    </div>
+                                    <div class="Card_Details" style="display: none">
+                                        <label>Card Owner Name:</label>
+                                        <div style="display: inline-block">{{$sales_overview[0]->Card_OwnerName}}</div>
+                                        <br>
+                                        <label>Bank Name:</label>
+                                        <div style="display: inline-block">{{$sales_overview[0]->Card_BankName}}</div>
+                                        <br>
+                                        <label>Card Number:</label>
+                                        <div style="display: inline-block">{{$sales_overview[0]->Card_Number}}</div>
+                                    </div>
+                                    <div class="UPI_Details" style="display: none">
+                                        <label for="">UPI Wallet:</label>
+                                        <div style="display: inline-block">{{$sales_overview[0]->UPI_WalletName}}</div>
+                                        <br>
+                                        <label for="">UPI Transaction ID:</label>
+                                        <div style="display: inline-block">{{$sales_overview[0]->UPI_TransactionId}}</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <a href="{{route('invoice',$sales_overview[0]->id)}}" class="btn btn-primary float-right">Print Invoice</a>
             </div>
         </div>
     </div>

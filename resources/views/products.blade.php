@@ -1,8 +1,12 @@
 @extends('layouts.admin')
 
 @section('content')
-    <!-- JQuery DataTables css-->
-    <link rel="stylesheet" href="//cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+
+    <style>
+        #Product-Table td,th{
+            text-align: center;
+        }
+    </style>
 
     {{-- Session Message --}}
     @if (session('status'))
@@ -45,12 +49,12 @@
                     </button>
                 </div>
             </div>
+            <form action="" method="POST" id="AddProductForm" enctype="multipart/form-data">
             <div class="card-body">
                 <div id="error_message"></div>
-            <form action="" method="POST" id="AddProductForm" enctype="multipart/form-data">
                 @csrf
-                <div class="card-body">
-                    <div id="error_message"></div>
+                    <div class="card-body">
+                        <div id="error_message"></div>
                         <div class="row">
                             <div class="col-md">
                                 <label for="Category">
@@ -81,19 +85,19 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4">
+                            {{-- <div class="col-md-4">
                                 <label for="Quantity">
                                     <b>4) Quantity:</b>
                                 </label>
-                                <input type="number" min="1" step="1" name="Quantity" id="Quantity" class="form-control" required>
-                            </div>
-                            <div class="col-md-4">
+                                <input type="number" min="1" step="1" name="Quantity" id="Quantity" class="form-control" >
+                            </div> --}}
+                            <div class="col-md-6">
                                 <label for="Alert_Quantity">
                                     <b>4) Alert Quantity:</b>
                                 </label>
                                 <input type="number" min="1" step="1" name="Alert_Quantity" id="Alert_Quantity" class="form-control" required>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="MRP">
                                     <b>5) MRP:</b>
                                 </label>
@@ -105,7 +109,7 @@
                                 <label for="Unit">
                                     <b>6)Unit:</b>
                                 </label>
-                                <select name="Unit" id="Unit" class="form-control select2 select2bs4 select2-danger" required>
+                                <select name="Unit" id="Unit" class="form-control select2 select2bs4 select2-danger">
                                     <option value="">Open this select menu</option>
                                     <option value="pcs">Pieces(pcs)</option>
                                     <option value="kg">KiloGram(Kg)</option>
@@ -129,7 +133,7 @@
                                     8)Short Description:
                                 </label>
                                 <textarea name="Short_Desc" id="Short_Desc" class="form-control" rows="5"
-                                    placeholder="Mention Size', 'Color', 'Material',etc attributes if any" required></textarea>
+                                    placeholder="Mention Size', 'Color', 'Material',etc attributes if any"></textarea>
                             </div>
                         </div>
                         <div class="row">
@@ -144,12 +148,13 @@
                                 <img alt="" id="Preview" style="height: 200px;width:200px;margin-top:15px;">
                             </div>
                         </div>
-                </div>
-                <!-- /.card-body -->
+                    </div>
+                    <!-- /.card-body -->
                 <div class="card-footer">
                     <button type="Submit" class="btn btn-success btn-lg" id="Add_Product">Add Product</button>
                 </div>
                 <!-- /.card-footer-->
+            </div>
             </form>
         </div>
         <!-- /.card -->
@@ -168,8 +173,8 @@
                     </button>
                 </div>
             </div>
-            <div class="card-body">
-                <table id="Product-Table" class="table table-bordered table-striped">
+            <div class="card-body table-responsive">
+                <table id="Product-Table" class="table table-bordered table-striped dataTable dtr-inline">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -177,12 +182,13 @@
                             <th>Name</th>
                             <th>Reference id</th>
                             <th>Category</th>
-                            <th>Quantity</th>
+                            {{-- <th>Quantity</th> --}}
                             <th>Alert_Quantity</th>
                             <th>Unit</th>
                             <th>TaxSlab</th>
                             <th>MRP</th>
                             <th>Short Description</th>
+                            <th>Active Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -258,13 +264,13 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-6">
+                            {{-- <div class="col-md-6">
                                 <label for="Quantity">
                                     <b>5) Quantity:</b>
                                 </label>
                                 <input type="number" min="1" step="1" name="Quantity" id="Edit_Quantity" class="form-control" required>
-                            </div>
-                            <div class="col-md-6">
+                            </div> --}}
+                            <div class="col-md-12">
                                 <label for="Alert_Quantity">
                                     <b>5) Alert Quantity:</b>
                                 </label>
@@ -302,6 +308,15 @@
                                 <textarea name="Short_Desc" id="Edit_Short_Desc" class="form-control" rows="5"></textarea>
                             </div>
                         </div>
+                        <div class="row">
+                            <label for="">10)Active Status:</label>
+                            <div class="form-group radio">
+                                <input type="radio" name="Active_Status" class="ml-3" id="Active" value="1">
+                                <label for="Active">Active</label>
+                                <input type="radio" name="Active_Status" class="ml-3" id="InActive" value="0">
+                                <label for="InActive">InActive</label>
+                            </div>
+                        </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -313,9 +328,6 @@
     </div>
 
     {{-- Scripts-------------------------------------------------------------------------- --}}
-
-    <!-- JQuery DataTable JS-->
-    <script src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
 
     <script>
         // <!--JQUERY DATATABLE SCRIPT-->
@@ -343,6 +355,52 @@
 
             //fetch data in datatable with ajax>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
             var table = $('#Product-Table').DataTable({
+                dom: "<'row'<'col-sm-12 col-md-4' B><'col-sm-12 col-md-4 text-center'l><'col-sm-12 col-md-4'f>>" +
+                    "<'row'<'col-sm-12'tr>>" +
+                    "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                    "lengthMenu": [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+
+                    buttons: [
+
+                        {
+                            extend: 'print',
+                            orientation: 'landscape',
+                            pageSize: 'A4',
+                            exportOptions: {
+                                columns: ':visible'
+                            },
+                            customize: function (win) {
+                                $(win.document.body).css('font-size', '9pt').css('color', '#000000');
+                                $(win.document.body).css('background', '#FFFFFF');
+                                $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
+                            },
+                            text : "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-printer' viewBox='0 0 16 16'><path d='M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z'/><path d='M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm7 2v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z'/></svg> Print"
+                        },
+
+                        {
+                            extend: 'pdfHtml5',
+                            orientation: 'landscape',
+                            pageSize: 'LEGAL',
+                            exportOptions: {
+                                columns: ':visible'
+                            },
+                            
+                        },
+                        {
+                            extend: 'excel',
+                            exportOptions: {
+                                columns: ':visible'
+                            },
+                            text : "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-file-spreadsheet' viewBox='0 0 16 16'><path d='M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v4h10V2a1 1 0 0 0-1-1H4zm9 6h-3v2h3V7zm0 3h-3v2h3v-2zm0 3h-3v2h2a1 1 0 0 0 1-1v-1zm-4 2v-2H6v2h3zm-4 0v-2H3v1a1 1 0 0 0 1 1h1zm-2-3h2v-2H3v2zm0-3h2V7H3v2zm3-2v2h3V7H6zm3 3H6v2h3v-2z'/></svg> Excel"
+                        },
+                        {
+                            extend: 'colvis',
+                            exportOptions: {
+                                columns: ':visible'
+                            },
+                            text : "<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-list' viewBox='0 0 16 16'><path fill-rule='evenodd' d='M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z'/></svg> Column Visible"
+                        }
+                    ],
                 processing: true,
                 serverSide: true,
                 ajax: "{{route('products.index')}}",
@@ -352,12 +410,13 @@
                     {data: 'Name',name: 'Name'},
                     {data: 'Reference_Id',name: 'Reference_Id'},
                     {data: 'Category',name: 'Category'},
-                    {data: 'Quantity',name: 'Quantity'},
+                    // {data: 'Quantity',name: 'Quantity'},
                     {data: 'Alert_Quantity',name: 'Alert_Quantity'},
                     {data: 'Unit',name: 'Unit'},
                     {data: 'TaxSlab',name: 'TaxSlab'},
                     {data: 'MRP',name: 'MRP'},
                     {data: 'Short_Desc',name: 'Short_Desc'},
+                    {data: 'Active_Status',name:'Active_Status'},
                     {data: 'action',name: 'action',orderable:false,searchable:false},
                 ]
             });
@@ -509,29 +568,38 @@
                 console.log("category"+category);
                 $("#EditProductModal #Edit_Category option[value="+category+"]").attr('selected', 'selected');
 
-                var Quantity = $(this).parent().parent().children().eq(5).text();
-                console.log("Quantity"+Quantity);
-                $('#Edit_Quantity').val(Quantity);
+                // var Quantity = $(this).parent().parent().children().eq(5).text();
+                // console.log("Quantity"+Quantity);
+                // $('#Edit_Quantity').val(Quantity);
 
-                var AlertQuantity = $(this).parent().parent().children().eq(6).text();
+                var AlertQuantity = $(this).parent().parent().children().eq(5).text();
                 console.log("Alert-Quantity"+AlertQuantity);
                 $('#Edit_Alert_Quantity').val(AlertQuantity);
 
-                var Unit = $(this).parent().parent().children().eq(7).text();
+                var Unit = $(this).parent().parent().children().eq(6).text();
                 console.log("Unit"+Unit);
                 $('#Edit_Unit').val(Unit);
 
-                var taxslab = $(this).parent().parent().children().eq(8).text();
+                var taxslab = $(this).parent().parent().children().eq(7).text();
                 console.log("taxslab"+taxslab);
                 $("#EditProductModal #Edit_TaxSlab option[value="+taxslab+"]").attr('selected', 'selected');
 
-                var MRP = $(this).parent().parent().children().eq(9).text();
+                var MRP = $(this).parent().parent().children().eq(8).text();
                 console.log("MRP"+MRP);
                 $('#Edit_MRP').val(MRP);
 
-                var Short_Desc = $(this).parent().parent().children().eq(10).text();
+                var Short_Desc = $(this).parent().parent().children().eq(9).text();
                 console.log("SD"+Short_Desc);
                 $('#Edit_Short_Desc').val(Short_Desc);
+
+                var status = $(this).parent().parent().children().eq(10).text();
+                console.log("Status:"+status);
+                if(status == '1'){
+                    $('#Active').attr('checked','checked');
+                }
+                else{
+                    $('#InActive').attr('checked','checked');
+                }
 
                 //initialise select 2
                 $('.select2').select2();

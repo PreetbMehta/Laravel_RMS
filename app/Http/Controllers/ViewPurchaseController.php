@@ -7,6 +7,7 @@ use App\Models\Purchase_Overview;
 use App\Models\Purchase_Detail;
 use App\Models\Supplier;
 use App\Models\Product;
+use App\Models\Product_Tracker;
 use DB;
 
 class ViewPurchaseController extends Controller
@@ -112,9 +113,11 @@ class ViewPurchaseController extends Controller
         $pur = Purchase_Overview::find($id)->delete();
 
         $purD = Purchase_Detail::where('purchase_details.Purchase_Id',$id)->delete();
-        echo($pur.'\n'.$purD);
+        
+        $p_track = Product_Tracker::where('product_trackers.Purchase_Id','=',$id)->delete();
+        // dd($pur.'\n'.$purD.'\n'.$p_track);
 
-        if($pur && $purD)
+        if($pur && $purD && $p_track)
         {
             return redirect()->back()->with('status','Purchase deleted successfully');
         }

@@ -126,8 +126,9 @@ class TaxSlabController extends Controller
         else
         {
             $taxSlab = taxSlab::find($id);
-
-            $okay = $taxSlab->update($request->all());
+            $taxSlab->TaxPercentage = $request->TaxPercentage;
+            $taxSlab->Active_Status = $request->Active_Status;
+            $okay = $taxSlab->update();
             if($okay){
                 // return redirect()->back()->with('status','Category updated successfully');
                 return response()->json([

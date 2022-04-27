@@ -38,6 +38,7 @@ class CreditsController extends Controller
         $payment->type = '1';
         $payment->Payment_Method = $request->Payment_Method;
         $payment->Note = $request->Note;
+        $payment->Status = '1';
         $payment->save();
         return redirect('credits')->with('status','Payment Added Successfully');
     }

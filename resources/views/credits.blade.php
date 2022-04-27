@@ -52,32 +52,34 @@
                     <span class="ion ion-plus-circled"></span>
                     Add Credit
                 </div>
-                <table class="table table-bordered table-striped rounded" id="Credit_Table">
-                    <thead>
-                        <th class="text-center">#</th>
-                        <th class="text-center">Customer Name</th>
-                        <th class="text-center">Customer Contact</th>
-                        <th class="text-center">Credit Amount</th>
-                        <th class="text-center">Action</th>
-                    </thead>
-                    <tbody>
-                        @php $count=1 @endphp
-                        @foreach ($cust_credit as $item)
-                            @if ($item->Credit>0)           
-                                <tr>
-                                    <td class="text-center">{{$count}}</td>
-                                    <td class="text-center">{{$item->Customer}}(Customer-id: {{$item->cust_id}})</td>
-                                    <td class="text-center">{{$item->Contact}}</td>
-                                    <td class="text-center">
-                                        <span class="bg-danger p-2">{{$item->Credit}}</span>
-                                    </td>
-                                    <td class="text-center"><a href="{{url('viewStatement/'.$item->cust_id)}}"><i class="ion ion-eye btn btn-info"> View Statement</i></a></td>
-                                </tr> 
-                                @php $count++ @endphp
-                            @endif
-                        @endforeach
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped dataTable dtr-inline" id="Credit_Table">
+                        <thead>
+                            <th class="text-center">#</th>
+                            <th class="text-center">Customer Name</th>
+                            <th class="text-center">Customer Contact</th>
+                            <th class="text-center">Credit Amount</th>
+                            <th class="text-center">Action</th>
+                        </thead>
+                        <tbody>
+                            @php $count=1 @endphp
+                            @foreach ($cust_credit as $item)
+                                @if ($item->Credit>0)           
+                                    <tr>
+                                        <td class="text-center">{{$count}}</td>
+                                        <td class="text-center">{{$item->Customer}}(Customer-id: {{$item->cust_id}})</td>
+                                        <td class="text-center">{{$item->Contact}}</td>
+                                        <td class="text-center">
+                                            <span class="bg-danger p-2">{{$item->Credit}}</span>
+                                        </td>
+                                        <td class="text-center"><a href="{{url('viewStatement/'.$item->cust_id)}}"><i class="ion ion-eye btn btn-info"> View Statement</i></a></td>
+                                    </tr> 
+                                    @php $count++ @endphp
+                                @endif
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

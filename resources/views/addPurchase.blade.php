@@ -92,7 +92,7 @@
                                 <b>Supplier Name:</b>
                                 <span style="color: red">*</span>
                             </label>
-                            <select name="Supplier_Name" id="Supplier_Name" class="form-control select2 select2bs4 select2-danger" required>
+                            <select name="Supplier_Name" id="Supplier_Name" class="form-control select2 select2bs4 select2-danger sup_name" required>
                                 <option value="">Open this select menu</option>
                                 @foreach ($Show_supp as $show_supp)
                                     <option value="{{ $show_supp->Supplier_Name }}"
@@ -112,11 +112,11 @@
                 </div>
                     <div class="content m-3">
                         <div class="card">
-                            <div class="card-body">
-                                <table class="table table-bordered table-striped" id="Purchase-Table">
+                            <div class="card-body table-responsive">
+                                <table class="table table-bordered table-striped dtr-inline" id="Purchase-Table">
                                     <thead>
                                         <tr>
-                                            <th>Product <span style="color: red">*</span></th>
+                                            <th style="width: 200px">Product <span style="color: red">*</span></th>
                                             <th style="width: 120px">Quantity <span style="color: red">*</span></th>
                                             <th style="width: 120px">Price <span style="color: red">*</span></th>
                                             <th style="width: 120px">Tax Slab(%)</th>
@@ -133,7 +133,7 @@
                                                         <option value=
                                                         "">open to select product</option>
                                                         @foreach ($showProduct as $Product_Item)
-                                                            <option value="{{ $Product_Item->Name }}" data-id="{{ $Product_Item->id }}" data-TaxSlab="{{$Product_Item->TaxSlab}}">{{ $Product_Item->Name }}</option>
+                                                            <option value="{{ $Product_Item->Name }}" data-id="{{ $Product_Item->id }}" data-TaxSlab="{{$Product_Item->TaxSlab}}">{{ $Product_Item->Name }}({{ $Product_Item->Reference_Id }})</option>
                                                         @endforeach
                                                     </select>
                                                     <input type="hidden" name="PurchaseProductId[]" class="PurchaseProductId">
@@ -228,25 +228,41 @@
         var today = moment().format('YYYY-MM-DD');
         $('#Date_Of_Purchase').val(today);
 
-        //fetching brand name by default on the basis of supplier name
-        $("#Supplier_Name").on('change', function() {
-            var selecteBrand = $(this).find(":selected").data("brand");
-            var selectSupId = $(this).find(":selected").data("id");
-            $("#Brand_Name").val(selecteBrand);
-            $('#Supplier_Id').val(selectSupId)
-        });
-
-         //fetching tax slab by default on the basis of product name
-         $(document).on('input','.PurchaseProduct', function() {
-                var row = $(this).closest('tr');
-                var selectTaxSlab = row.find(".PurchaseProduct :selected").attr("data-TaxSlab");
-                var selectProductId = row.find(".PurchaseProduct :selected").attr("data-id");
-                console.log(selectTaxSlab);
-                row.find(".PurchaseTaxSlab").val(selectTaxSlab);
-                row.find(".PurchaseProductId").val(selectProductId);
-        });
         
         $(document).ready(function(){
+            
+            //fetching brand name by default on the basis of supplier name
+            $(".sup_name").on('change', function() {
+                var selecteBrand = $(this).find(":selected").data("brand");
+                var selectSupId = $(this).find(":selected").data("id");
+                $("#Brand_Name").val(selecteBrand);
+                $('#Supplier_Id').val(selectSupId);
+            });
+    
+             //fetching tax slab by default on the basis of product name
+             $(document).on('input','.PurchaseProduct', function() {
+                    var row = $(this).closest('tr');
+                    var selectTaxSlab = row.find(".PurchaseProduct :selected").attr("data-TaxSlab");
+                    var selectProductId = row.find(".PurchaseProduct :selected").attr("data-id");
+                    console.log(selectTaxSlab);
+                    row.find(".PurchaseTaxSlab").val(selectTaxSlab);
+                    row.find(".PurchaseProductId").val(selectProductId);
+
+                    var price = row.find('.PurchasePrice').val();
+                        var qty = row.find('.PurchaseQuantity').val();
+                        
+                        var subTotal = qty * parseFloat(price);
+                        console.log(qty + '\t' + price + '\t' + subTotal);
+                        row.find(".PurchaseSubTotal").val(isNaN(subTotal.toFixed(2)) ? 0 : subTotal.toFixed(2));
+                        
+                        //calculating tax amount
+                        var taxslab = row.find('.PurchaseTaxSlab').val();
+                        taxAmt = parseFloat((taxslab*price*qty)/100);
+                        row.find('.PurchaseTaxAmount').val(isNaN(taxAmt.toFixed(2)) ? 0 : taxAmt.toFixed(2));
+                        console.log(taxAmt);
+                        TotalCalculate();
+            });
+
             //add green plus to the last row of adding product
             $('#Purchase-Table tbody tr:last td:last .AddMoreProduct').css('display', 'inline-block');
 
@@ -265,7 +281,7 @@
                                                 <select name="PurchaseProduct[]" class="form-control select2 select2bs4 select2-danger PurchaseProduct" data-dropdown-css-class="select2-danger" style="width: 100%;" required>\
                                                     <option>open to select product</option>\
                                                     @foreach ($showProduct as $Product_Item)\
-                                                        <option value="{{ $Product_Item->Name }}" data-id="{{ $Product_Item->id }}" data-TaxSlab="{{$Product_Item->TaxSlab}}"">{{ $Product_Item->Name }}</option>\
+                                                        <option value="{{ $Product_Item->Name }}" data-id="{{ $Product_Item->id }}" data-TaxSlab="{{$Product_Item->TaxSlab}}"">{{ $Product_Item->Name }}({{ $Product_Item->Reference_Id }})</option>\
                                                     @endforeach\
                                                 </select>\
                                                 <input type="hidden" name="PurchaseProductId[]" class="PurchaseProductId">\
@@ -316,7 +332,14 @@
                var row = $(this).closest('tr');
                count -=1;//decrease row count
                console.log("After Del Row: "+count);
-               row.remove();
+               if(count<=0)
+               {
+                   location.reload();
+               }
+               else
+               {
+                   row.remove();
+               }
 
                //add green plus to the last row of adding product
                 $('#Purchase-Table tbody tr:last td:last .AddMoreProduct').css('display', 'inline-block');

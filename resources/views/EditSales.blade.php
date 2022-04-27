@@ -79,12 +79,12 @@
                                 </div>
                             </div>
                             <div class="card m-2">
-                                <div class="card-body">
+                                <div class="card-body table-responsive p-1">
                                     <!-- table for adding ordered products -->
-                                    <table class="table table-bordered table-striped m-1" id="Sales_Table">
+                                    <table class="table table-bordered table-striped m-1 dtr-inline" id="Sales_Table">
                                         <thead>
                                             <tr>
-                                                <th>Product <span style="color: red">*</span></th>
+                                                <th style="width: 170px">Product <span style="color: red">*</span></th>
                                                 <th style="width: 100px">Quantity <span style="color: red">*</span></th>
                                                 <th style="width: 100px">MRP <span style="color: red">*</span></th>
                                                 <th style="width: 100px">Tax Slab(%)</th>
@@ -109,23 +109,24 @@
                                                                         {{ $Pro_Item->Name }}</option>
                                                                 @endforeach
                                                             </select>
+                                                            <input type="hidden" name="OldProduct[]" value="{{$item->Sales_Product}}">
                                                         </div>
                                                     </td>
                                                     <td style="width: 120px">
-                                                        <input type="number" min="1" class="form-control SalesQuantity"
+                                                        <input type="number" min="1" class="p-1 form-control SalesQuantity"
                                                         name="SalesQuantity[]" value="{{$item->Sales_Quantity}}" required>
                                                     </td>
                                                     <td style="width: 120px">
-                                                        <input type="number" min="0.01" step="0.01" class="form-control SalesPrice" name="SalesPrice[]" value="{{$item->Sales_Price}}" readonly>
+                                                        <input type="number" min="0.01" step="0.01" class="p-1 form-control SalesPrice" name="SalesPrice[]" value="{{$item->Sales_Price}}" readonly>
                                                     </td>
                                                     <td style="width: 120px">
-                                                        <input type="number" class="form-control SalesTaxSlab" name="SalesTaxSlab[]" value="{{$item->SalesTaxSlab}}" readonly>
+                                                        <input type="number" class="p-1 form-control SalesTaxSlab" name="SalesTaxSlab[]" value="{{$item->SalesTaxSlab}}" readonly>
                                                     </td>
                                                     <td style="width: 120px">
-                                                        <input type="number" class="form-control SalesTaxAmount" name="SalesTaxAmount[]" value="{{$item->SalesTaxAmount}}" readonly>
+                                                        <input type="number" class="p-1 form-control SalesTaxAmount" name="SalesTaxAmount[]" value="{{$item->SalesTaxAmount}}" readonly>
                                                     </td>
                                                     <td style="width: 200px">
-                                                        <input type="text" class="form-control SalesSubTotal" name="SalesSubTotal[]" value="{{$item->SalesSubTotal}}" readonly>
+                                                        <input type="text" class="p-1 form-control SalesSubTotal" name="SalesSubTotal[]" value="{{$item->SalesSubTotal}}" readonly>
                                                     </td>
                                                     <td style="width: 60px">
                                                         <span class=" btn btn-sm btn-danger rounded-3 btnSpan DelProduct" value="{{$item->id}}"><i class="fas fa-times mt-2 btnI"></i></span>
@@ -226,7 +227,7 @@
                         </div>
                         <div class="card-footer">
                             <div class="float-right">
-                                <input type="Submit" class="btn btn-success btn-lg" id="AddSale" value="Add Sale" />
+                                <input type="Submit" class="btn btn-success btn-lg" id="AddSale" value="Edit Sale" />
                             </div>
                         </div>
                     </div>
@@ -239,14 +240,14 @@
             var contact = $('#Customer_Id :selected').data('contact');
             $('#Contact').val(contact);
 
-            //adding contact info on selection of customer name
-            $('#Customer_Id').on('change', function() {
-                var contact = $('#Customer_Id :selected').data('contact');
-                // console.log(contact);
-                $('#Contact').val(contact);
-            });
-
             $(document).ready(function() {
+                //adding contact info on selection of customer name
+                $('#Customer_Id').on('change', function() {
+                    var contact = $('#Customer_Id :selected').data('contact');
+                    // console.log(contact);
+                    $('#Contact').val(contact);
+                });
+
                 //initialise select 2
                 $('.select2').select2();
 
@@ -325,6 +326,7 @@
                 }
 
                 var count = $('#Total_Products').val(); //initialize counter variable to count number of rows/products ordered
+                console.log("Count Start: "+count);
                 $(document).on('click', '.AddMoreProduct', function(e) {
                     e.preventDefault();
                     $('#Sales_Table tbody').append('<tr>\
@@ -338,6 +340,7 @@
                                                                             <option value="{{ $Product_Item->id }}" data-MRP="{{ $Product_Item->MRP }}" data-TaxSlab="{{$Product_Item->TaxSlab}}">{{ $Product_Item->Name }}</option>\
                                                                         @endforeach\
                                                                     </select>\
+                                                            <input type="hidden" name="OldProduct[]" value="{{$item->Sales_Product}}">\
                                                                 </div>\
                                                             </td>\
                                                             <td style="width: 120px">\
@@ -427,6 +430,8 @@
                                             break;
                                         default: 
                                             swal(name+" Category Not Deleted!!","","warning");
+                                            count++;
+                                            console.log('row del calcel,Count:'+count);
                                             break;
                                     }
                                 })
@@ -434,6 +439,8 @@
                     }
                     else
                     {
+                        count-=1;
+                        console.log("Count"+count);
                         $(this).closest('tr').remove();
                         //remove class of red cross and add classes of green plus to the last row of tbody
                         $('#Sales_Table tbody tr:last td:last .AddMoreProduct').css('display', 'inline-block');

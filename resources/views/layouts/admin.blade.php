@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>RMS System| Dashboard</title>
+    <title>Easy Business| Dashboard</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
@@ -30,7 +30,10 @@
     <link rel="stylesheet" href={{ asset('plugins/summernote/summernote-bs4.min.css') }}>
 
     <!-- JQuery DataTables css-->
-    <link rel="stylesheet" href="//cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css">
+    {{-- <link rel="stylesheet" href="//cdn.datatables.net/1.11.4/css/jquery.dataTables.min.css"> --}}
+    <link rel="stylesheet" href={{asset("plugins/datatables-bs4/css/dataTables.bootstrap4.min.css")}}>
+    <link rel="stylesheet" href={{asset("plugins/datatables-responsive/css/responsive.bootstrap4.min.css")}}>
+    <link rel="stylesheet" href={{asset("plugins/datatables-buttons/css/buttons.bootstrap4.min.css")}}>
 
     <!-- jQuery -->
     <script src={{ asset('plugins/jquery/jquery.min.js') }}></script>
@@ -126,7 +129,7 @@
             <a href={{ route('home') }} class="brand-link">
                 <img src="{{ asset('dist/img/AdminLTELogo.png') }}" alt="AdminLTE Logo"
                     class="brand-image img-circle elevation-3" style="opacity: .8">
-                <span class="brand-text font-weight-light">RMS System</span>
+                <span class="brand-text font-weight-light">Easy Business</span>
             </a>
 
             <!-- Sidebar -->
@@ -238,7 +241,7 @@
                               </a>
                             </li>
                             <li class="nav-item">
-                                <a href="/ViewSales" class="nav-link">
+                                <a href="{{route('viewSales')}}" class="nav-link">
                                     <i class="nav-icon ion ion-calendar"></i>
                                     <p>
                                         View Sale
@@ -248,10 +251,18 @@
                           </ul>
                         </li> 
                         <li class="nav-item">
-                            <a href="/credits" class="nav-link">
+                            <a href="{{route('credits.index')}}" class="nav-link">
                                 <i class="nav-icon ion ion-compose"></i>
                                 <p>
                                     Credits
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('payback.index') }}" class="nav-link">
+                                <i class="nav-icon ion ion-cash"></i>
+                                <p>
+                                    Pay Back
                                 </p>
                             </a>
                         </li>
@@ -263,6 +274,73 @@
                                 </p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                              <i class="nav-icon fas fa-tachometer-alt"></i>
+                              <p>
+                                Reports
+                                <i class="right fas fa-angle-left"></i>
+                              </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href={{ route('salesReport.index') }} class="nav-link">
+                                        <i class="nav-icon ion ion-calendar"></i>
+                                        <p>
+                                            Sales Report
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                  <a href="{{ route('purchaseReport.index') }}" class="nav-link">
+                                      <i class="nav-icon ion ion-calendar"></i>
+                                      <p>
+                                          Purchase Report
+                                      </p>
+                                  </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('ReturnOrdersReport.index') }}" class="nav-link">
+                                        <i class="nav-icon ion ion-calendar"></i>
+                                        <p>
+                                            Return Orders Report
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('PaymentReport.index') }}" class="nav-link">
+                                        <i class="nav-icon ion ion-calendar"></i>
+                                        <p>
+                                            Payment Report
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('PayBackReport.index') }}" class="nav-link">
+                                        <i class="nav-icon ion ion-calendar"></i>
+                                        <p>
+                                            PayBack Report
+                                        </p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('StockReport.index') }}" class="nav-link">
+                                        <i class="nav-icon ion ion-calendar"></i>
+                                        <p>
+                                            Stock Report
+                                        </p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('settings.index') }}" class="nav-link">
+                                <i class="nav-icon ion ion-android-settings"></i>
+                                <p>
+                                    Settings
+                                </p>
+                            </a>
+                        </li> 
                         {{-- <li class="nav-item">
             <a class="nav-link" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
@@ -309,8 +387,7 @@
     <script>
         $.widget.bridge('uibutton', $.ui.button)
     </script>
-    <!-- Bootstrap 4 -->
-    <script src={{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}></script>
+
     <!-- ChartJS -->
     <script src={{ asset('plugins/chart.js/Chart.min.js') }}></script>
     <!-- Sparkline -->
@@ -331,10 +408,25 @@
     <!-- AdminLTE for demo purposes -->
     {{-- <script src={{asset("dist/js/demo.js")}}></script> --}}
 
-
+    <script src="{{asset('/plugins/jquery/jquery.min.js')}}"></script>
     <!-- JQuery DataTable JS-->
-    <script src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    {{-- <script src="//cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script> --}}
+    <script src={{asset("plugins/datatables/jquery.dataTables.min.js")}}></script>
+    <script src={{asset("plugins/datatables-bs4/js/dataTables.bootstrap4.min.js")}}></script>
+    <script src={{asset("plugins/datatables-responsive/js/dataTables.responsive.min.js")}}></script>
+    <script src={{asset("plugins/datatables-responsive/js/responsive.bootstrap4.min.js")}}></script>
+    <script src={{asset("plugins/datatables-buttons/js/dataTables.buttons.min.js")}}></script>
+    <script src={{asset("plugins/datatables-buttons/js/buttons.bootstrap4.min.js")}}></script>
+    <script src={{asset("plugins/jszip/jszip.min.js")}}></script>
+    <script src={{asset("plugins/pdfmake/pdfmake.min.js")}}></script>
+    <script src={{asset("plugins/pdfmake/vfs_fonts.js")}}></script>
+    <script src={{asset("plugins/datatables-buttons/js/buttons.html5.min.js")}}></script>
+    <script src={{asset("plugins/datatables-buttons/js/buttons.print.min.js")}}></script>
+    <script src={{asset("plugins/datatables-buttons/js/buttons.colVis.min.js")}}></script>
 
+    <!-- Bootstrap 4 -->
+    <script src={{ asset('plugins/bootstrap/js/bootstrap.bundle.min.js') }}></script>
+    
     {{-- sweetalert.cdn--------++++++++++++++------------ --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"
         integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA=="
@@ -345,16 +437,6 @@
 
     {{-- script to active nav tag dynamically as per the page --}}
     <script>
-        // $('.nav a').each(function(){
-        //   var pageUrl = window.location.href.split(/[?#]/)[0];
-        //   // console.log(pageUrl);
-        //   if(this.href == pageUrl)
-        //   {
-        //     $(this).addClass('active');
-        //     // console.log(this.href);
-        //   }
-        // });
-
         $(".nav a").each(function() {
             var pageUrl = window.location.href.split(/[?#]/)[0];
 

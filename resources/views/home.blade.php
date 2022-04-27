@@ -2,6 +2,11 @@
 
 @section('content')
 
+  <style>
+    #Alert_Table td,th{
+      text-align: center;
+    }
+  </style>
  <!-- Content Header (Page header) -->
  <div class="content-header">
     <div class="container-fluid">
@@ -25,7 +30,7 @@
     <div class="container-fluid">
       <!-- Small boxes (Stat box) -->
       <div class="row">
-        <div class="col-lg-2 col-6">
+        <div class="col-lg-4 col-6">
           <!-- small box -->
           <div class="small-box bg-info">
             <div class="inner">
@@ -40,7 +45,7 @@
           </div>
         </div>
         <!-- ./col -->
-        <div class="col-lg-2 col-6">
+        <div class="col-lg-4 col-6">
           <!-- small box -->
           <div class="small-box bg-success">
             <div class="inner">
@@ -55,7 +60,7 @@
           </div>
         </div>
         <!-- ./col -->
-        <div class="col-lg-2 col-6">
+        <div class="col-lg-4 col-6">
           <!-- small box -->
           <div class="small-box bg-warning">
             <div class="inner">
@@ -70,7 +75,7 @@
           </div>
         </div>
         <!-- ./col -->
-        <div class="col-lg-2 col-6">
+        <div class="col-lg-4 col-6">
           <!-- small box -->
           <div class="small-box bg-danger">
             <div class="inner">
@@ -84,9 +89,9 @@
             <a href={{route('categories.index')}} class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
-        <div class="col-lg-2 col-6">
+        <div class="col-lg-4 col-6">
           <!-- small box -->
-          <div class="small-box bg-warning">
+          <div class="small-box bg-primary">
             <div class="inner">
               <h3>{{$purchase}}</h3>
 
@@ -98,9 +103,9 @@
             <a href={{route('viewPurchase.index')}} class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
           </div>
         </div>
-        <div class="col-lg-2 col-6">
+        <div class="col-lg-4 col-6">
           <!-- small box -->
-          <div class="small-box bg-info">
+          <div class="small-box bg-dark">
             <div class="inner">
               <h3>{{$sale}}</h3>
 
@@ -115,7 +120,7 @@
         <!-- ./col -->
       </div>
       {{-- alert quantity table ================================================================--}}
-      <div class="card card-primary alert-quantity-table w-50">
+      <div class="card card-primary alert-quantity-table">
         <div class="card-header">
           <h3 class="card-title">Alert Quantity Products</h3>
 
@@ -126,24 +131,24 @@
           </div>
         </div>
         <!-- /.card-header -->
-        <div class="card-body h-25">
+        <div class="card-body h-25 table-responsive">
           <h5 class="total_alerts small-box p-2 mb-1 bg-info float-right">
             Total Alerts:{{count($proAlert)}}
           </h5>
-          <table class="table table-bordered table-striped" id="Alert_Table">
+          <table class="table table-bordered table-striped dataTable dtr-inline" id="Alert_Table">
             <thead>
               <th>#</th>
               <th>Product</th>
-              <th>Quantity</th>
               <th>Alert Quantity</th>
+              <th>Current Quantity</th>
             </thead>
             <tbody class="overflow-y-auto">
               @foreach ($proAlert as $item)
                   <tr>
-                    <td>{{$item->id}}</td>
+                    <td>{{$item->Product_Id}}</td>
                     <td>{{$item->Name}}({{$item->Reference_Id}})</td>
-                    <td>{{$item->Quantity}}</td>
                     <td><span class="bg-danger p-1">{{$item->Alert_Quantity}}</span></td>
+                    <td>{{$item->QuantityLeft}}</td>
                   </tr>
               @endforeach
             </tbody>
